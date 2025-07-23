@@ -17,6 +17,21 @@
     "url": "https://lafucode.com"
   },
   "copyright": "Copyright (c) 2025 LaFu Code. All rights reserved.",
+  "icon": "resources/icon.jpeg",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "ai",
+    "openai",
+    "claude",
+    "gemini",
+    "tongyi"
+  ],
+  "license": "MIT",
   "categories": [
     "SCM Providers",
     "Other"
@@ -119,15 +134,13 @@
         }
       }
     },
-    "menus": {
-      "scm/title": [
-        {
-          "command": "lafucode-ai-git-commit.generateCommitMessage",
-          "when": "scmProvider == git",
-          "group": "navigation"
-        }
-      ]
-    }
+    "keybindings": [
+      {
+        "command": "lafucode-ai-git-commit.generateCommitMessage",
+        "key": "ctrl+shift+g ctrl+shift+a",
+        "when": "scmProvider == git"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "pnpm run compile",
