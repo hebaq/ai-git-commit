@@ -33,6 +33,7 @@
 2. 运行 `git add .` 暂存更改
 3. 打开源码管理面板（`Ctrl+Shift+G`）
 4. 点击源码管理标题栏右侧的 ✨ **生成提交信息** 按钮
+   ![图片描述](resources/screenshot.png)
 5. 自动生成提交信息！
 
 ### 启用 AI 功能
@@ -222,18 +223,6 @@ echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
 }
 ```
 
-### 按钮图标自定义
-
-当前使用 `$(lightbulb)` 💡 图标，可选图标：
-
-- `$(robot)` 🤖 - 机器人
-- `$(sparkle)` ✨ - 闪光
-- `$(lightbulb)` 💡 - 灯泡（当前）
-- `$(git-commit)` 📝 - Git 提交
-- `$(tools)` 🔧 - 工具
-
-修改方法：在 `package.json` 中更改 `"icon"` 字段
-
 ---
 
 ## 🔧 故障排除
@@ -272,46 +261,6 @@ echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
 
 ---
 
-## 🛠️ 开发说明
-
-### 技术架构
-
-- **OpenAI SDK**: 统一调用 OpenAI 和通义灵码
-- **Axios**: 调用 Claude 和 Gemini 专有 API
-- **智能回退**: AI 失败时自动使用本地生成
-- **TypeScript**: 完整的类型安全
-
-### 项目结构
-
-```
-lafucode-ai-git-commit/
-├── src/extension.ts          # 扩展主要代码
-├── package.json              # 扩展配置和依赖
-├── README.md                 # 项目说明（本文档）
-└── dist/                     # 编译输出
-```
-
-### 编译和测试
-
-```bash
-# 安装依赖
-pnpm install
-
-# 编译扩展
-pnpm run compile
-
-# 启动调试
-按 F5 键
-```
-
-### 系统要求
-
-- VS Code 1.102.0+
-- Git 已安装并配置
-- 当前工作区必须是 Git 仓库
-
----
-
 ## 🎉 总结
 
 LaFu AI Git Commit 提供了完整的 AI 驱动提交信息生成解决方案：
@@ -332,6 +281,6 @@ MIT
 
 © 2025 LaFu Code. All rights reserved.
 
-"LaFu AI 智能提交" 是 LaFu Code 的商标。未经许可，禁止使用本商标或类似标识。
+"LaFu AI 智能提交" 是 [LaFu Code](https://lafucode.com) 的商标。未经许可，禁止使用本商标或类似标识。
 
 本扩展的核心算法、用户界面设计和品牌标识均受版权法保护。
