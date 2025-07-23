@@ -12,6 +12,7 @@
     "type": "git",
     "url": "https://github.com/pythonsir/lafucode-ai-git-commit.git"
   },
+  "homepage": "https://lafucode.com",
   "author": {
     "name": "LaFu Code",
     "email": "lafucode@proton.me",
@@ -134,6 +135,15 @@
           "markdownDescription": "控制 AI 的创造性程度：\n- **0** = 保守准确\n- **1** = 创新多样"
         }
       }
+    },
+    "menus": {
+      "scm/title": [
+        {
+          "command": "lafucode-ai-git-commit.generateCommitMessage",
+          "when": "scmProvider == git",
+          "group": "navigation"
+        }
+      ]
     },
     "keybindings": [
       {
