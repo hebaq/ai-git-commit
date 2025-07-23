@@ -7,6 +7,7 @@
   "engines": {
     "vscode": "^1.102.0"
   },
+  "pricing": "Free",
   "repository": {
     "type": "git",
     "url": "https://github.com/pythonsir/lafucode-ai-git-commit.git"
