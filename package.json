@@ -3,7 +3,7 @@
   "publisher": "lafucode",
   "displayName": "LaFu AI 智能提交",
   "description": "AI 驱动的智能 Git 提交信息生成器，支持多种 AI 提供商和本地生成",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "engines": {
     "vscode": "^1.102.0"
   },
