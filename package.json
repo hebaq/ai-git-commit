@@ -1,0 +1,152 @@
+{
+  "name": "lafucode-ai-git-commit",
+  "publisher": "lafucode",
+  "displayName": "LaFu AI 智能提交",
+  "description": "AI 驱动的智能 Git 提交信息生成器，支持多种 AI 提供商和本地生成",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.102.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pythonsir/lafucode-ai-git-commit.git"
+  },
+  "author": {
+    "name": "LaFu Code",
+    "email": "lafucode@proton.me",
+    "url": "https://lafucode.com"
+  },
+  "copyright": "Copyright (c) 2025 LaFu Code. All rights reserved.",
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:.git"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "lafucode-ai-git-commit.generateCommitMessage",
+        "title": "生成提交信息",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "lafucode-ai-git-commit.openSettings",
+        "title": "打开 LaFu AI Git Commit 设置"
+      }
+    ],
+    "configuration": {
+      "title": "LaFu AI Git Commit",
+      "properties": {
+        "lafucode-ai-git-commit.aiProvider": {
+          "type": "string",
+          "enum": [
+            "local",
+            "openai",
+            "claude",
+            "gemini",
+            "tongyi"
+          ],
+          "default": "local",
+          "description": "选择 AI 提供商",
+          "markdownDescription": "## 🤖 AI 提供商\n选择用于生成提交信息的 AI 服务",
+          "enumDescriptions": [
+            "本地规则生成（无需 API，免费使用）",
+            "OpenAI (GPT-3.5/GPT-4)",
+            "Anthropic Claude",
+            "Google Gemini",
+            "阿里云通义灵码"
+          ]
+        },
+        "lafucode-ai-git-commit.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "AI API 密钥",
+          "markdownDescription": "## 🔑 API 密钥\nAI 服务的 API 密钥。**建议使用环境变量**：\n- OpenAI: `OPENAI_API_KEY`\n- Claude: `CLAUDE_API_KEY`\n- Gemini: `GEMINI_API_KEY`\n- 通义灵码: `TONGYI_API_KEY`"
+        },
+        "lafucode-ai-git-commit.model": {
+          "type": "string",
+          "default": "gpt-3.5-turbo",
+          "description": "AI 模型名称",
+          "markdownDescription": "## 🤖 模型选择\n根据选择的 AI 提供商输入对应的模型名称：\n\n**OpenAI**: `gpt-3.5-turbo`, `gpt-4`, `gpt-4-turbo`, `gpt-4o`\n\n**Claude**: `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`, `claude-3-opus-20240229`\n\n**Gemini**: `gemini-pro`, `gemini-1.5-pro`, `gemini-1.5-flash`\n\n**通义灵码**: `qwen-turbo`, `qwen-plus`, `qwen-max`, `qwen-max-longcontext`"
+        },
+        "lafucode-ai-git-commit.language": {
+          "type": "string",
+          "enum": [
+            "zh",
+            "en"
+          ],
+          "default": "zh",
+          "description": "提交信息语言",
+          "markdownDescription": "## ⚙️ 生成设置\n选择提交信息的语言",
+          "enumDescriptions": [
+            "中文",
+            "English"
+          ]
+        },
+        "lafucode-ai-git-commit.commitStyle": {
+          "type": "string",
+          "enum": [
+            "conventional",
+            "simple",
+            "detailed"
+          ],
+          "default": "conventional",
+          "description": "提交信息风格",
+          "enumDescriptions": [
+            "Conventional Commits 规范",
+            "简洁风格",
+            "详细描述"
+          ]
+        },
+        "lafucode-ai-git-commit.maxTokens": {
+          "type": "number",
+          "default": 200,
+          "minimum": 50,
+          "maximum": 1000,
+          "description": "AI 响应最大 token 数",
+          "markdownDescription": "## 🔧 高级设置\n控制 AI 响应的最大长度（影响 API 费用）"
+        },
+        "lafucode-ai-git-commit.temperature": {
+          "type": "number",
+          "default": 0.3,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "AI 创造性程度",
+          "markdownDescription": "控制 AI 的创造性程度：\n- **0** = 保守准确\n- **1** = 创新多样"
+        }
+      }
+    },
+    "menus": {
+      "scm/title": [
+        {
+          "command": "lafucode-ai-git-commit.generateCommitMessage",
+          "when": "scmProvider == git",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "vsce package --no-dependencies",
+    "build": "webpack --mode production --devtool hidden-source-map"
+  },
+  "devDependencies": {
+    "@types/node": "~20.19.9",
+    "@types/vscode": "^1.102.0",
+    "@vscode/vsce": "^3.6.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.3",
+    "webpack": "^5.99.7",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "axios": "^1.10.0",
+    "openai": "^5.10.2"
+  }
+}
