@@ -33,6 +33,7 @@
 2. 运行 `git add .` 暂存更改
 3. 打开源码管理面板（`Ctrl+Shift+G`）
 4. 点击源码管理标题栏右侧的 ✨ **生成提交信息** 按钮
+   ![图片描述](resources/screenshot.png)
 5. 自动生成提交信息！
 
 ### 启用 AI 功能
@@ -222,18 +223,6 @@ echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
 }
 ```
 
-### 按钮图标自定义
-
-当前使用 `$(lightbulb)` 💡 图标，可选图标：
-
-- `$(robot)` 🤖 - 机器人
-- `$(sparkle)` ✨ - 闪光
-- `$(lightbulb)` 💡 - 灯泡（当前）
-- `$(git-commit)` 📝 - Git 提交
-- `$(tools)` 🔧 - 工具
-
-修改方法：在 `package.json` 中更改 `"icon"` 字段
-
 ---
 
 ## 🔧 故障排除
@@ -272,6 +261,7 @@ echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
 
 ---
 
+<<<<<<< HEAD
 ## 🛠️ 开发说明
 
 ### 技术架构
@@ -312,6 +302,8 @@ pnpm run compile
 
 ---
 
+=======
+>>>>>>> 10a63f77e379b1c74d1469d7b5a65114d7beaaf8
 ## 🎉 总结
 
 LaFu AI Git Commit 提供了完整的 AI 驱动提交信息生成解决方案：
@@ -332,6 +324,6 @@ MIT
 
 © 2025 LaFu Code. All rights reserved.
 
-"LaFu AI 智能提交" 是 LaFu Code 的商标。未经许可，禁止使用本商标或类似标识。
+"LaFu AI 智能提交" 是 [LaFu Code](https://lafucode.com) 的商标。未经许可，禁止使用本商标或类似标识。
 
 本扩展的核心算法、用户界面设计和品牌标识均受版权法保护。
