@@ -17,7 +17,7 @@
 
 ## ✨ 功能特性
 
-- 🤖 **AI 智能生成** - 支持 OpenAI、Claude、Gemini、通义灵码
+- 🤖 **AI 智能生成** - 支持 OpenAI、Claude、Gemini、通义千问
 - 🔧 **本地规则生成** - 无需 API 的本地智能分析
 - ✨ **一键操作** - 点击源码管理标题栏的 ✨ 按钮即可生成
 - ⚙️ **丰富配置** - 自定义 AI 提供商、语言、风格等
@@ -38,7 +38,7 @@
 ### 启用 AI 功能
 
 1. **打开设置**：按 `Ctrl+,` 搜索 "LaFu AI Git Commit"
-2. **配置 AI 提供商**：选择 OpenAI/Claude/Gemini/通义灵码
+2. **配置 AI 提供商**：选择 OpenAI/Claude/Gemini/通义千问
 3. **设置 API 密钥**：输入密钥或使用环境变量
 4. **开始使用**：点击 ✨ 按钮享受 AI 生成
 
@@ -56,7 +56,7 @@
 - **OpenAI** (GPT-3.5/GPT-4)
 - **Anthropic Claude**
 - **Google Gemini**
-- **阿里云通义灵码**
+- **阿里云通义千问**
 
 #### 2. � API 密钥
 
@@ -72,7 +72,7 @@
 - **OpenAI**: `gpt-3.5-turbo`, `gpt-4`, `gpt-4-turbo`, `gpt-4o`
 - **Claude**: `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`
 - **Gemini**: `gemini-pro`, `gemini-1.5-pro`, `gemini-1.5-flash`
-- **通义灵码**: `qwen-turbo`, `qwen-plus`, `qwen-max`
+- **通义千问**: `qwen-turbo`, `qwen-plus`, `qwen-max`
 
 #### 4. ⚙️ 生成设置
 
@@ -121,7 +121,7 @@
 - **环境变量**: `GEMINI_API_KEY`
 - **特点**: Google 技术，多模态支持
 
-### 阿里云通义灵码 ⭐
+### 阿里云通义千问 ⭐
 
 - **模型**: qwen-turbo, qwen-plus, qwen-max, qwen-max-longcontext
 - **获取密钥**: [阿里云 DashScope](https://dashscope.console.aliyun.com/)
@@ -168,12 +168,12 @@ OpenAI, Claude, Gemini, and Tongyi. Includes intelligent fallback
 mechanism and configurable generation styles.
 ```
 
-#### AI 生成（通义灵码）
+#### AI 生成（通义千问）
 
 ```
 feat: 实现AI驱动的提交信息生成功能
 
-集成多个AI提供商支持，包括OpenAI、Claude、Gemini和通义灵码，
+集成多个AI提供商支持，包括OpenAI、Claude、Gemini和通义千问，
 添加智能回退机制和可配置的生成风格，提升开发者提交信息质量。
 ```
 
@@ -211,7 +211,7 @@ echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
 }
 ```
 
-#### 通义灵码配置
+#### 通义千问配置
 
 ```json
 {
@@ -256,7 +256,7 @@ echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
 
 - 检查网络连接
 - 国内用户访问 OpenAI 可能需要代理
-- 尝试使用通义灵码（国内访问更稳定）
+- 尝试使用通义千问（国内访问更稳定）
 
 #### AI 生成失败
 
@@ -276,7 +276,7 @@ echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
 
 ### 技术架构
 
-- **OpenAI SDK**: 统一调用 OpenAI 和通义灵码
+- **OpenAI SDK**: 统一调用 OpenAI 和通义千问
 - **Axios**: 调用 Claude 和 Gemini 专有 API
 - **智能回退**: AI 失败时自动使用本地生成
 - **TypeScript**: 完整的类型安全
