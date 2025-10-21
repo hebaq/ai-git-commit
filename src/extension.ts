@@ -30,6 +30,8 @@ interface AIConfig {
 	commitStyle: 'conventional' | 'simple' | 'detailed';
 	maxTokens: number;
 	temperature: number;
+	openaiBaseUrl?: string;
+	claudeBaseUrl?: string;
 }
 
 // 获取 AI 配置
@@ -67,7 +69,29 @@ function getAIConfig(): AIConfig {
 
 	// 获取模型配置，如果没有配置则根据提供商设置默认值
 	let model = config.get('model', '');
-	if (!model) {
+
+	// 首先检查提供商特定的环境变量
+	let envModel = '';
+	switch (provider) {
+		case 'openai':
+			envModel = process.env.OPENAI_MODEL || '';
+			break;
+		case 'claude':
+			envModel = process.env.CLAUDE_MODEL || '';
+			break;
+		case 'gemini':
+			envModel = process.env.GEMINI_MODEL || '';
+			break;
+		case 'tongyi':
+			envModel = process.env.TONGYI_MODEL || '';
+			break;
+	}
+
+	// 优先级：环境变量 > VS Code 设置 > 提供商默认值
+	if (envModel) {
+		model = envModel;
+	} else if (!model) {
+		// 如果没有配置，设置提供商默认模型
 		switch (provider) {
 			case 'openai':
 				model = 'gpt-3.5-turbo';
@@ -86,6 +110,12 @@ function getAIConfig(): AIConfig {
 		}
 	}
 
+	// 获取 OpenAI baseUrl
+	const openaiBaseUrl = config.get('openaiBaseUrl', '') || process.env.OPENAI_BASE_URL || '';
+
+	// 获取 Claude baseUrl
+	const claudeBaseUrl = config.get('claudeBaseUrl', '') || process.env.CLAUDE_BASE_URL || '';
+
 	return {
 		provider: provider,
 		apiKey: config.get('apiKey', '') || envApiKey,
@@ -93,7 +123,9 @@ function getAIConfig(): AIConfig {
 		language: config.get('language', 'zh'),
 		commitStyle: config.get('commitStyle', 'conventional'),
 		maxTokens: config.get('maxTokens', 200),
-		temperature: config.get('temperature', 0.3)
+		temperature: config.get('temperature', 0.3),
+		openaiBaseUrl: openaiBaseUrl || undefined,
+		claudeBaseUrl: claudeBaseUrl || undefined
 	};
 }
 
@@ -292,7 +324,11 @@ function createOpenAIClient(config: AIConfig): OpenAI {
 	// 根据不同厂商配置不同的 baseURL
 	switch (config.provider) {
 		case 'openai':
-			// 使用默认的 OpenAI API
+			// OpenAI 支持自定义 baseUrl
+			if (config.openaiBaseUrl) {
+				clientConfig.baseURL = config.openaiBaseUrl;
+				console.log('🌐 使用自定义 OpenAI Base URL:', config.openaiBaseUrl);
+			}
 			break;
 		case 'claude':
 			// Claude 暂时不支持 OpenAI 格式，保持原有实现
@@ -332,9 +368,9 @@ async function generateAICommitMessage(diffOutput: string, config: AIConfig): Pr
 // 构建 AI 提示词
 function buildPrompt(diffOutput: string, config: AIConfig): string {
 	// 限制 diff 长度以避免超出 token 限制
-	const truncatedDiff = diffOutput.length > 3000 ?
-		diffOutput.substring(0, 3000) + '\n... (truncated)' : diffOutput;
-
+	// const truncatedDiff = diffOutput.length > 3000 ?
+	// 	diffOutput.substring(0, 3000) + '\n... (truncated)' : diffOutput;
+	const truncatedDiff = diffOutput;
 	if (config.language === 'zh') {
 		// 中文提示词
 		const stylePrompt = {
@@ -343,19 +379,83 @@ function buildPrompt(diffOutput: string, config: AIConfig): string {
 			'detailed': '详细的多行中文描述，包含变更原因和影响'
 		}[config.commitStyle];
 
-		return `请根据以下代码变更生成中文的 Git 提交信息，使用${stylePrompt}。
+		// 根据风格调整提示词
+		const isConventional = config.commitStyle === 'conventional';
+		const headerDescription = isConventional
+			? '遵循 Conventional Commits 规范，格式：<type>(<scope>): <subject>'
+			: '使用简洁清晰的描述';
 
-基于以下代码变更：
+		return `你是一个专业的 Git 提交信息生成助手。请根据以下代码变更生成中文提交信息，风格：${stylePrompt}。
+
+## Git Diff 格式说明
+- 以 "-" 开头的行：表示删除的旧代码
+- 以 "+" 开头的行：表示添加的新代码
+- 需要同时分析 "-" 和 "+" 行来理解变更的本质
+
+## 代码变更
 
 \`\`\`diff
 ${truncatedDiff}
 \`\`\`
 
-要求：
-1. 必须使用中文描述代码变更的内容和目的
-2. 遵循指定的格式规范
-3. 保持简洁明了
-4. 只返回中文提交信息，不要其他解释`;
+## 严格要求
+
+1. **输出格式**：直接输出提交信息，不要任何前缀说明或解释
+2. **禁止使用**：Markdown 代码块标记（不要 \`\`\`）
+3. **禁止说明性文字**：不要说"根据代码变更"、"以下是"、"或者"等
+4. **唯一性**：只返回一个最佳的提交信息
+5. **语言**：必须使用中文
+6. **格式规范**：${headerDescription}
+
+${isConventional ? `## 提交类型识别规则
+
+准确识别变更类型，参考以下规则：
+
+- **feat** (✨ 新功能)：新增功能、特性
+- **fix** (🐛 修复)：修复 Bug、问题
+- **docs** (📝 文档)：文档、注释变更
+- **style** (🎨 格式)：代码格式调整（不影响代码逻辑）
+- **refactor** (♻️ 重构)：重构代码（既不是新功能也不是修复）
+- **perf** (⚡ 性能)：性能优化
+- **test** (✅ 测试)：添加或修改测试
+- **chore** (🔧 杂项)：构建工具、依赖、配置文件等变更
+- **ci** (👷 CI/CD)：CI/CD 配置和脚本
+- **revert** (⏪ 回退)：回退之前的提交` : ''}
+
+## 变更类型判断
+
+- **只有 "-" 行**：代码删除
+- **只有 "+" 行**：代码新增
+- **同时有 "-" 和 "+" 行**：代码修改、替换或重构，需分析具体含义
+
+## 输出格式示例
+
+${isConventional ? `<type>(<scope>): <subject>
+
+<body>
+
+- **Header**（首行）：≤ 72 字符，祈使语气（如"添加"、"修复"、"更新"）
+- **Body**（正文）：说明动机、实现细节、影响范围
+- **Scope**（范围）：可选，如 ui、api、core 等
+
+## 示例
+
+feat(auth): 添加用户登录功能
+
+实现了基于 JWT 的用户认证系统，包含：
+- 用户名密码登录表单
+- Token 存储和自动刷新
+- 登录状态持久化` : config.commitStyle === 'simple' ? `一行简洁描述即可，无需详细说明
+
+## 示例
+
+添加用户登录功能` : `提供详细的多行描述
+
+## 示例
+
+添加用户登录功能
+
+本次更新实现了完整的用户认证系统，基于 JWT Token 机制。主要包含用户名密码登录表单、Token 存储和自动刷新机制、以及登录状态的持久化。这为后续的权限管理和用户个性化功能奠定了基础。`}`;
 	} else {
 		// 英文提示词
 		const stylePrompt = {
@@ -364,18 +464,130 @@ ${truncatedDiff}
 			'detailed': 'detailed multi-line description with reasons and impact'
 		}[config.commitStyle];
 
-		return `Please generate an English Git commit message using ${stylePrompt} based on the following code changes:
+		// 根据风格调整提示词
+		const isConventional = config.commitStyle === 'conventional';
+		const headerDescription = isConventional
+			? 'Follow Conventional Commits specification, format: <type>(<scope>): <subject>'
+			: 'Use clear and concise description';
+
+		return `You are a professional Git commit message generator. Generate a commit message based on code changes with style: ${stylePrompt}.
+
+## Git Diff Format
+- Lines starting with "-": removed old code
+- Lines starting with "+": added new code
+- Analyze both "-" and "+" lines to understand the nature of changes
+
+## Code Changes
 
 \`\`\`diff
 ${truncatedDiff}
 \`\`\`
 
-Requirements:
-1. Accurately describe the content and purpose of code changes in English
-2. Follow the specified format specification
-3. Keep it concise and clear
-4. Only return the English commit message, no other explanations`;
+## Strict Requirements
+
+1. **Output Format**: Output commit message directly, no prefix or explanation
+2. **Forbidden**: Markdown code block markers (no \`\`\`)
+3. **Forbidden Phrases**: Do NOT say "Based on the code changes", "Here is", "Or", etc.
+4. **Uniqueness**: Return only ONE best commit message
+5. **Language**: Must be in English
+6. **Format**: ${headerDescription}
+
+${isConventional ? `## Commit Type Identification Rules
+
+Accurately identify change type following these rules:
+
+- **feat** (✨ New feature): Add new functionality or features
+- **fix** (🐛 Bug fix): Fix bugs or issues
+- **docs** (📝 Documentation): Documentation or comments changes
+- **style** (🎨 Code style): Code formatting (no logic changes)
+- **refactor** (♻️ Refactor): Code refactoring (neither feature nor fix)
+- **perf** (⚡ Performance): Performance improvements
+- **test** (✅ Testing): Add or modify tests
+- **chore** (🔧 Maintenance): Build tools, dependencies, config files
+- **ci** (👷 CI/CD): CI/CD configuration and scripts
+- **revert** (⏪ Revert): Revert previous commits` : ''}
+
+## Change Type Analysis
+
+- **Only "-" lines**: Code deletion
+- **Only "+" lines**: Code addition
+- **Both "-" and "+" lines**: Code modification, replacement, or refactoring - analyze specific meaning
+
+## Output Format Example
+
+${isConventional ? `<type>(<scope>): <subject>
+
+<body>
+
+- **Header** (first line): ≤ 72 chars, imperative mood (e.g., "add", "fix", "update")
+- **Body**: Explain motivation, implementation details, impact scope
+- **Scope**: Optional, e.g., ui, api, core
+
+## Example
+
+feat(auth): add user login feature
+
+Implemented JWT-based user authentication system with:
+- Username/password login form
+- Token storage and auto-refresh
+- Login state persistence` : config.commitStyle === 'simple' ? `One-line concise description, no details needed
+
+## Example
+
+Add user login feature` : `Provide detailed multi-line description
+
+## Example
+
+Add user login feature
+
+This update implements a complete user authentication system based on JWT token mechanism. It includes username/password login form, token storage and auto-refresh mechanism, and login state persistence. This lays the foundation for subsequent permission management and user personalization features.`}`;
 	}
+}
+
+// 清理 AI 返回的提交信息
+function cleanCommitMessage(message: string): string {
+	let cleaned = message.trim();
+
+	// 移除常见的 Markdown 代码块标记
+	cleaned = cleaned.replace(/^```[\s\S]*?\n/, '');  // 移除开始的代码块
+	cleaned = cleaned.replace(/\n```[\s\S]*?$/, '');  // 移除结尾的代码块
+	cleaned = cleaned.replace(/^```|```$/g, '');      // 移除单独的代码块标记
+
+	// 移除常见的说明性前缀（中文）
+	const chinesePrefixes = [
+		/^根据提供的代码变更[，,：:].*/,
+		/^这是一个.*/,
+		/^以下是.*[：:]\s*/,
+		/^或者更简洁的版本[：:]\s*/,
+		/^或者[：:]\s*/,
+		/^建议的提交信息[：:]\s*/,
+		/^提交信息[：:]\s*/
+	];
+
+	// 移除常见的说明性前缀（英文）
+	const englishPrefixes = [
+		/^Based on the (?:provided )?code changes[,:].*/i,
+		/^Here (?:is|are) the.*/i,
+		/^Or a more concise version[:]?\s*/i,
+		/^Or[:]?\s*/i,
+		/^Suggested commit message[:]?\s*/i,
+		/^Commit message[:]?\s*/i
+	];
+
+	for (const prefix of [...chinesePrefixes, ...englishPrefixes]) {
+		cleaned = cleaned.replace(prefix, '');
+	}
+
+	// 如果返回了多个选项（用"或者"等关键词分隔），只取第一个
+	// 注意：不要把正常的提交信息（标题+详细描述）误认为是多选项
+	const optionKeywords = /\n\s*(?:或者|或|Or)\s*[:：]?\s*\n/i;
+	if (optionKeywords.test(cleaned)) {
+		// 确实有多个选项，按关键词分割
+		const parts = cleaned.split(optionKeywords);
+		cleaned = parts[0].trim();
+	}
+
+	return cleaned.trim();
 }
 
 // 使用 OpenAI SDK 统一调用（支持 OpenAI 和通义灵码）
@@ -394,14 +606,21 @@ async function callWithOpenAISDK(prompt: string, config: AIConfig): Promise<stri
 		temperature: config.temperature
 	});
 
-	return response.choices[0].message.content?.trim() || '';
+	const rawMessage = response.choices[0].message.content?.trim() || '';
+	return cleanCommitMessage(rawMessage);
 }
 
 
 
 // Claude API 调用
 async function callClaude(prompt: string, config: AIConfig): Promise<string> {
-	const response = await axios.post('https://api.anthropic.com/v1/messages', {
+	// 构建 API 端点
+	const baseUrl = config.claudeBaseUrl || 'https://api.anthropic.com';
+	const apiEndpoint = `${baseUrl}/v1/messages`;
+
+	console.log('📡 Claude API 端点:', apiEndpoint);
+
+	const response = await axios.post(apiEndpoint, {
 		model: config.model,
 		max_tokens: config.maxTokens,
 		temperature: config.temperature,
@@ -419,7 +638,8 @@ async function callClaude(prompt: string, config: AIConfig): Promise<string> {
 		}
 	});
 
-	return response.data.content[0].text.trim();
+	const rawMessage = response.data.content[0].text.trim();
+	return cleanCommitMessage(rawMessage);
 }
 
 // Gemini API 调用
@@ -444,7 +664,8 @@ async function callGemini(prompt: string, config: AIConfig): Promise<string> {
 		}
 	});
 
-	return response.data.candidates[0].content.parts[0].text.trim();
+	const rawMessage = response.data.candidates[0].content.parts[0].text.trim();
+	return cleanCommitMessage(rawMessage);
 }
 
 

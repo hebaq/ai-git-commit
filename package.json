@@ -1,7 +1,7 @@
 {
-  "name": "lafucode-ai-git-commit",
-  "publisher": "lafucode",
-  "displayName": "LaFu AI 智能提交",
+  "name": "hebaq-ai-git-commit",
+  "publisher": "hebaq",
+  "displayName": "AI 智能提交",
   "description": "AI 驱动的智能 Git 提交信息生成器，支持多种 AI 提供商和本地生成",
   "version": "1.0.3",
   "engines": {
@@ -10,13 +10,10 @@
   "pricing": "Free",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pythonsir/lafucode-ai-git-commit.git"
+    "url": "https://github.com/hebaq/ai-git-commit"
   },
-  "homepage": "https://lafucode.com",
   "author": {
-    "name": "LaFu Code",
-    "email": "lafucode@proton.me",
-    "url": "https://lafucode.com"
+    "name": "禾白"
   },
   "copyright": "Copyright (c) 2025 LaFu Code. All rights reserved.",
   "icon": "resources/icon.jpeg",
@@ -87,7 +84,7 @@
           "type": "string",
           "default": "gpt-3.5-turbo",
           "description": "AI 模型名称",
-          "markdownDescription": "## 🤖 模型选择\n根据选择的 AI 提供商输入对应的模型名称：\n\n**OpenAI**: `gpt-3.5-turbo`, `gpt-4`, `gpt-4-turbo`, `gpt-4o`\n\n**Claude**: `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`, `claude-3-opus-20240229`\n\n**Gemini**: `gemini-pro`, `gemini-1.5-pro`, `gemini-1.5-flash`\n\n**通义灵码**: `qwen-turbo`, `qwen-plus`, `qwen-max`, `qwen-max-longcontext`"
+          "markdownDescription": "## 🤖 模型选择\n根据选择的 AI 提供商输入对应的模型名称。支持任意自定义模型名称（用于私有部署或兼容 API）。\n\n**预设模型（推荐）**：\n- **OpenAI**: `gpt-3.5-turbo`, `gpt-4`, `gpt-4-turbo`, `gpt-4o`, `gpt-4o-mini`\n- **Claude**: `claude-3-opus-20240229`, `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`\n- **Gemini**: `gemini-pro`, `gemini-1.5-pro`, `gemini-1.5-flash`\n- **通义灵码**: `qwen-turbo`, `qwen-plus`, `qwen-max`, `qwen-max-longcontext`\n\n**自定义模型**：直接输入任意模型名称即可，也可通过环境变量配置：`OPENAI_MODEL`, `CLAUDE_MODEL`, `GEMINI_MODEL`, `TONGYI_MODEL`"
         },
         "lafucode-ai-git-commit.language": {
           "type": "string",
@@ -133,6 +130,18 @@
           "maximum": 1,
           "description": "AI 创造性程度",
           "markdownDescription": "控制 AI 的创造性程度：\n- **0** = 保守准确\n- **1** = 创新多样"
+        },
+        "lafucode-ai-git-commit.openaiBaseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI 自定义 Base URL",
+          "markdownDescription": "## 🌐 OpenAI 自定义 Base URL\n用于代理、兼容 API 或私有部署。**留空则使用官方 API**。\n\n**示例**：\n- 代理：`https://api.openai.com/v1` 或 `http://localhost:8000/v1`\n- 私有部署：`https://your-custom-domain.com/v1`\n\n**环境变量**：`OPENAI_BASE_URL`（优先级高于此配置）"
+        },
+        "lafucode-ai-git-commit.claudeBaseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Claude 自定义 Base URL",
+          "markdownDescription": "## 🌐 Claude 自定义 Base URL\n用于代理或兼容实现。**留空则使用官方 API**。\n\n**示例**：\n- 官方：`https://api.anthropic.com`\n- 代理：`https://proxy.example.com`\n- 私有部署：`https://your-custom-domain.com`\n\n**环境变量**：`CLAUDE_BASE_URL`（优先级高于此配置）"
         }
       }
     },
