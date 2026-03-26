@@ -1,6 +1,8 @@
 export const CONFIG_NAMESPACE = 'hebai-ai-git-commit';
 export const GENERATE_COMMIT_MESSAGE_COMMAND = `${CONFIG_NAMESPACE}.generateCommitMessage`;
 export const OPEN_SETTINGS_COMMAND = `${CONFIG_NAMESPACE}.openSettings`;
+export const OUTPUT_CHANNEL_NAME = 'Hebai AI Git Commit';
+export const ENABLE_DEBUG_LOGS_SETTING = 'enableDebugLogs';
 
 export const EXTENSION_ID = 'hebai-ai-git-commit-v1.0';
 export const AUTHOR_SIGNATURE = 'Hebai © 2026';

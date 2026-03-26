@@ -46,12 +46,13 @@
 
 ## 配置指南
 
-当前设置页只保留 4 项：
+当前设置页包含 5 项：
 
 1. `aiProvider`
 2. `baseUrl`
 3. `apiKey`
 4. `model`
+5. `enableDebugLogs`
 
 ### 1. AI 提供商
 
@@ -83,6 +84,12 @@
 - `OPENAI_MODEL`
 - `CLAUDE_MODEL`
 - `GEMINI_MODEL`
+
+### 5. 调试日志输出
+
+- 默认关闭。
+- 开启后，调试日志会写入 VS Code 输出面板中的 `Hebai AI Git Commit` 通道。
+- 最终生成的提交信息和错误日志始终会输出到该通道。
 
 ---
 
@@ -167,7 +174,8 @@ export OPENAI_MODEL="gpt-4o-mini"
   "hebai-ai-git-commit.aiProvider": "openai",
   "hebai-ai-git-commit.baseUrl": "http://localhost:8000/v1",
   "hebai-ai-git-commit.apiKey": "your-api-key",
-  "hebai-ai-git-commit.model": "gpt-4o-mini"
+	"hebai-ai-git-commit.model": "gpt-4o-mini",
+	"hebai-ai-git-commit.enableDebugLogs": true
 }
 ```
 
@@ -178,7 +186,8 @@ export OPENAI_MODEL="gpt-4o-mini"
   "hebai-ai-git-commit.aiProvider": "openai-response",
   "hebai-ai-git-commit.baseUrl": "https://api.openai.com/v1",
   "hebai-ai-git-commit.apiKey": "your-api-key",
-  "hebai-ai-git-commit.model": "gpt-4.1-mini"
+	"hebai-ai-git-commit.model": "gpt-4.1-mini",
+	"hebai-ai-git-commit.enableDebugLogs": true
 }
 ```
 
@@ -203,12 +212,12 @@ export OPENAI_MODEL="gpt-4o-mini"
 
 ### AI 返回了 git commit 命令，但解析失败
 
-扩展会在控制台打印：
+扩展会在 VS Code 输出面板的 `Hebai AI Git Commit` 通道打印：
 
 - `AI 原始返回:`
 - `AI 原始返回（标准化后）:`
 
-可根据这两条日志判断模型是否返回了非标准命令格式。
+开启 `enableDebugLogs` 后，可根据这两条日志判断模型是否返回了非标准命令格式。
 
 ### 网络连接问题
 

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import { CONFIG_NAMESPACE } from './constants';
+import { logDebug } from './output';
 import type { AIConfig, AIProvider } from './types';
 
 function getDefaultModel(provider: AIProvider): string {
@@ -68,8 +69,8 @@ export function getAIConfig(): AIConfig {
 	const config = vscode.workspace.getConfiguration(CONFIG_NAMESPACE);
 	const provider = config.get('aiProvider', 'openai') as AIProvider;
 
-	console.log('=== 配置读取调试 ===');
-	console.log('Provider:', provider);
+	logDebug('=== 配置读取调试 ===');
+	logDebug(`Provider: ${provider}`);
 
 	const envApiKey = getEnvApiKey(provider);
 	const envModel = getEnvModel(provider);

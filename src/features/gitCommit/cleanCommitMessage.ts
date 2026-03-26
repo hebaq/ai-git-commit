@@ -1,3 +1,5 @@
+import { logDebug } from './output';
+
 function normalizeCommandText(message: string): string {
 	return message
 		.trim()
@@ -56,7 +58,7 @@ export function cleanCommitMessage(message: string): string {
 	}
 
 	if (/\bgit\s+commit\b/i.test(normalized)) {
-		console.log('AI 原始返回（标准化后）:', normalized);
+		logDebug(`AI 原始返回（标准化后）: ${normalized}`);
 		throw new Error('AI 返回了 git commit 命令，但未能解析出 -m 参数中的提交信息');
 	}
 

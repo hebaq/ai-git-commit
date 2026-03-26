@@ -88,6 +88,12 @@
           "default": "gpt-3.5-turbo",
           "description": "AI 模型名称",
           "markdownDescription": "根据选择的 AI 提供商输入模型名称。可通过环境变量覆盖：`OPENAI_MODEL`、`CLAUDE_MODEL`、`GEMINI_MODEL`。"
+		},
+		"hebai-ai-git-commit.enableDebugLogs": {
+		  "type": "boolean",
+		  "default": false,
+		  "description": "是否在输出面板中输出调试日志",
+		  "markdownDescription": "控制是否将调试日志写入 `Hebai AI Git Commit` 输出面板。最终生成的提交信息和错误日志始终会输出。"
         }
       }
     },

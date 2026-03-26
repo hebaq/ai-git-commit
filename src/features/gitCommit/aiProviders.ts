@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 
 import { cleanCommitMessage } from './cleanCommitMessage';
 import { AI_RESPONSE_MAX_TOKENS, AI_RESPONSE_TEMPERATURE } from './constants';
+import { logDebug } from './output';
 import { buildPrompt } from './prompt';
 import type { AIConfig } from './types';
 
@@ -20,7 +21,7 @@ function createOpenAIClient(config: AIConfig): OpenAI {
 		case 'openai-response':
 			if (config.baseUrl) {
 				clientConfig.baseURL = normalizeBaseUrl(config.baseUrl);
-				console.log('使用自定义 OpenAI Base URL:', clientConfig.baseURL);
+				logDebug(`使用自定义 OpenAI Base URL: ${clientConfig.baseURL}`);
 			}
 			break;
 		default:
@@ -45,7 +46,7 @@ async function callWithOpenAISDK(prompt: string, config: AIConfig): Promise<stri
 	});
 
 	const rawMessage = response.choices[0].message.content?.trim() || '';
-	console.log('AI 原始返回:', rawMessage);
+	logDebug(`AI 原始返回: ${rawMessage}`);
 	return cleanCommitMessage(rawMessage);
 }
 
@@ -57,7 +58,7 @@ async function callWithOpenAIResponsesAPI(prompt: string, config: AIConfig): Pro
 	});
 
 	const rawMessage = response.output_text?.trim() || '';
-	console.log('AI 原始返回:', rawMessage);
+	logDebug(`AI 原始返回: ${rawMessage}`);
 	return cleanCommitMessage(rawMessage);
 }
 
@@ -65,7 +66,7 @@ async function callClaude(prompt: string, config: AIConfig): Promise<string> {
 	const baseUrl = normalizeBaseUrl(config.baseUrl || 'https://api.anthropic.com');
 	const apiEndpoint = `${baseUrl}/v1/messages`;
 
-	console.log('Claude API 端点:', apiEndpoint);
+	logDebug(`Claude API 端点: ${apiEndpoint}`);
 
 	const response = await axios.post(apiEndpoint, {
 		model: config.model,
@@ -86,7 +87,7 @@ async function callClaude(prompt: string, config: AIConfig): Promise<string> {
 	});
 
 	const rawMessage = response.data.content[0].text.trim();
-	console.log('AI 原始返回:', rawMessage);
+	logDebug(`AI 原始返回: ${rawMessage}`);
 	return cleanCommitMessage(rawMessage);
 }
 
@@ -113,7 +114,7 @@ async function callGemini(prompt: string, config: AIConfig): Promise<string> {
 	});
 
 	const rawMessage = response.data.candidates[0].content.parts[0].text.trim();
-	console.log('AI 原始返回:', rawMessage);
+	logDebug(`AI 原始返回: ${rawMessage}`);
 	return cleanCommitMessage(rawMessage);
 }
 

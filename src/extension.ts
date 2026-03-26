@@ -18,10 +18,11 @@ import {
 	GENERATE_PROGRESS_TITLE,
 	OPEN_SETTINGS_COMMAND
 } from './features/gitCommit/constants';
+import { disposeOutputChannel, logDebug, logError, showOutputChannel } from './features/gitCommit/output';
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Hebai AI 智能提交扩展已激活');
-	console.log(`${AUTHOR_SIGNATURE} - 扩展ID: ${EXTENSION_ID}`);
+	logDebug('Hebai AI 智能提交扩展已激活');
+	logDebug(`${AUTHOR_SIGNATURE} - 扩展ID: ${EXTENSION_ID}`);
 
 	const generateDisposable = vscode.commands.registerCommand(GENERATE_COMMIT_MESSAGE_COMMAND, async () => {
 		await vscode.window.withProgress({
@@ -32,7 +33,8 @@ export function activate(context: vscode.ExtensionContext) {
 			try {
 				await handleGenerateCommitMessage();
 			} catch (error) {
-				console.error('生成提交信息时出错:', error);
+				logError('生成提交信息时出错:', error);
+				showOutputChannel(true);
 				vscode.window.showErrorMessage(
 					`生成提交信息失败: ${error instanceof Error ? error.message : '未知错误'}`,
 					'重试'
@@ -49,9 +51,10 @@ export function activate(context: vscode.ExtensionContext) {
 		handleOpenSettings();
 	});
 
-	context.subscriptions.push(generateDisposable, settingsDisposable);
+	context.subscriptions.push(generateDisposable, settingsDisposable, { dispose: disposeOutputChannel });
 }
 
 export function deactivate() {
-	console.log('hebai-ai-git-commit extension is deactivated');
+	logDebug('hebai-ai-git-commit extension is deactivated');
+	disposeOutputChannel();
 }

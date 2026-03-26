@@ -3,12 +3,14 @@ import * as cp from 'child_process';
 import * as vscode from 'vscode';
 import { promisify } from 'util';
 
+import { logError } from './output';
+
 const exec = promisify(cp.exec);
 
 export function getWorkspacePath(): string {
 	const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 	if (!workspaceFolder) {
-		console.log('没有找到工作区文件夹');
+		logError('没有找到工作区文件夹');
 		throw new Error('请在 Git 仓库中打开项目');
 	}
 
