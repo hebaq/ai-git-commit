@@ -1,278 +1,235 @@
 # Hebai AI Git Commit
 
-🤖 一个智能的 VS Code 扩展，使用 AI 自动生成 Git 提交信息。
+一个 VS Code 扩展，用 AI 生成 Git 提交信息，并将结果直接写入源码管理输入框。
 
-## 📖 目录
+## 目录
 
-1. [功能特性](#-功能特性)
-2. [快速开始](#-快速开始)
-3. [配置指南](#️-配置指南)
-4. [AI 提供商](#-ai-提供商)
-5. [使用方法](#-使用方法)
-6. [自定义设置](#-自定义设置)
-7. [故障排除](#-故障排除)
-8. [开发说明](#️-开发说明)
-
----
-
-## ✨ 功能特性
-
-- 🤖 **AI 智能生成** - 支持 OpenAI、Claude、Gemini、通义千问
-- 🔧 **本地规则生成** - 无需 API 的本地智能分析
-- ✨ **一键操作** - 点击源码管理标题栏的 ✨ 按钮即可生成
-- ⚙️ **丰富配置** - 自定义 AI 提供商、语言、风格等
-- 🔄 **智能回退** - AI 失败时自动使用本地生成
-- 🌍 **多语言支持** - 支持中文和英文提交信息
-- 📊 **多种风格** - Conventional Commits、简洁、详细等风格
-
-## 🚀 快速开始
-
-### 立即使用（无需配置）
-
-1. 在 Git 仓库中修改代码
-2. 运行 `git add .` 暂存更改
-3. 打开源码管理面板（`Ctrl+Shift+G`）
-4. 点击源码管理标题栏右侧的 ✨ **生成提交信息** 按钮
-   ![图片描述](resources/screenshot.png)
-5. 自动生成提交信息！
-
-### 启用 AI 功能
-
-1. **打开设置**：按 `Ctrl+,` 搜索 "Hebai AI Git Commit"
-2. **配置 AI 提供商**：选择 OpenAI/Claude/Gemini/通义千问
-3. **设置 API 密钥**：输入密钥或使用环境变量
-4. **开始使用**：点击 ✨ 按钮享受 AI 生成
+1. [功能特性](#功能特性)
+2. [快速开始](#快速开始)
+3. [配置指南](#配置指南)
+4. [AI 提供商](#ai-提供商)
+5. [使用方法](#使用方法)
+6. [自定义设置](#自定义设置)
+7. [故障排除](#故障排除)
+8. [开发说明](#开发说明)
 
 ---
 
-## ⚙️ 配置指南
+## 功能特性
 
-### 配置顺序（按逻辑排列）
+- 支持 OpenAI、OpenAI Responses API、Claude、Gemini
+- 点击源码管理标题栏右侧的图标即可生成提交信息
+- 固定输出 Conventional Commits 风格的中文提交信息
+- 要求模型返回 `git commit -m` 命令，再由扩展提取 `-m` 中的内容写入输入框
+- 支持自定义基础请求地址，适配代理、网关和兼容服务
 
-#### 1. 🤖 AI 提供商
+## 快速开始
 
-选择用于生成提交信息的 AI 服务：
+### 使用步骤
 
-- **本地规则生成**（默认，无需 API）
-- **OpenAI** (GPT-3.5/GPT-4)
-- **Anthropic Claude**
-- **Google Gemini**
-- **阿里云通义千问**
+1. 在 Git 仓库中修改代码。
+2. 运行 `git add .` 或按需暂存变更。
+3. 打开源码管理面板：`Ctrl+Shift+G`。
+4. 点击源码管理标题栏右侧的“生成提交信息”按钮。
+5. 扩展会调用 AI 生成结果，并把解析后的提交信息写入输入框。
 
-#### 2. � API 密钥
+![图片描述](resources/screenshot.png)
 
-配置 AI 服务的访问密钥：
+### 首次配置
 
-- 支持直接输入或环境变量
-- **建议使用环境变量**确保安全
-
-#### 3. 🤖 模型选择
-
-根据选择的提供商输入对应模型：
-
-- **OpenAI**: `gpt-3.5-turbo`, `gpt-4`, `gpt-4-turbo`, `gpt-4o`
-- **Claude**: `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`
-- **Gemini**: `gemini-pro`, `gemini-1.5-pro`, `gemini-1.5-flash`
-- **通义千问**: `qwen-turbo`, `qwen-plus`, `qwen-max`
-
-#### 4. ⚙️ 生成设置
-
-- **语言**: 中文（默认）/ English
-- **提交风格**: Conventional Commits（默认）/ 简洁 / 详细
-
-#### 5. 🔧 高级设置
-
-- **Max Tokens**: 50-1000（默认 200）
-- **Temperature**: 0-1（默认 0.3，控制创造性）
-
-### VS Code 设置界面配置
-
-#### 打开设置
-
-1. **快捷键**：`Ctrl+,`
-2. **菜单**：文件 → 首选项 → 设置
-3. **命令面板**：`Ctrl+Shift+P` → "Preferences: Open Settings"
-
-#### 搜索配置
-
-在设置搜索框中输入：`hebai-ai-git-commit`
+1. 按 `Ctrl+,` 打开设置，搜索 `Hebai AI Git Commit`。
+2. 选择 AI 提供商。
+3. 填写基础请求地址、API Key、模型。
+4. 回到源码管理面板，点击生成按钮。
 
 ---
 
-## 🤖 AI 提供商
+## 配置指南
+
+当前设置页只保留 4 项：
+
+1. `aiProvider`
+2. `baseUrl`
+3. `apiKey`
+4. `model`
+
+### 1. AI 提供商
+
+可选值：
+
+- `openai`
+- `openai-response`
+- `claude`
+- `gemini`
+
+### 2. 基础请求地址
+
+- 留空时使用各 provider 的默认地址。
+- 可用于代理、兼容网关或私有部署。
+- 支持环境变量：`AI_BASE_URL`、`OPENAI_BASE_URL`、`CLAUDE_BASE_URL`、`GEMINI_BASE_URL`
+
+### 3. API Key
+
+建议优先使用环境变量：
+
+- `OPENAI_API_KEY`
+- `CLAUDE_API_KEY`
+- `GEMINI_API_KEY`
+
+### 4. 模型
+
+可直接输入任意模型名称，也可通过环境变量覆盖：
+
+- `OPENAI_MODEL`
+- `CLAUDE_MODEL`
+- `GEMINI_MODEL`
+
+---
+
+## AI 提供商
 
 ### OpenAI
 
-- **模型**: GPT-3.5-turbo, GPT-4, GPT-4-turbo, GPT-4o
-- **获取密钥**: [OpenAI API Keys](https://platform.openai.com/api-keys)
-- **环境变量**: `OPENAI_API_KEY`
-- **特点**: 成熟稳定，支持多种模型
+- 默认走 `chat.completions`
+- 适合大多数 OpenAI 兼容服务
 
-### Anthropic Claude
+### OpenAI Responses API
 
-- **模型**: claude-3-sonnet-20240229, claude-3-haiku-20240307
-- **获取密钥**: [Anthropic Console](https://console.anthropic.com/)
-- **环境变量**: `CLAUDE_API_KEY`
-- **特点**: 安全可靠，适合企业使用
+- 走 `/v1/responses`
+- 仅适用于明确支持 Responses API 的服务
+- 如果你的网关只兼容 `/v1/chat/completions`，请改用 `openai`
 
-### Google Gemini
+### Claude
 
-- **模型**: gemini-pro, gemini-1.5-pro, gemini-1.5-flash
-- **获取密钥**: [Google AI Studio](https://makersuite.google.com/app/apikey)
-- **环境变量**: `GEMINI_API_KEY`
-- **特点**: Google 技术，多模态支持
+- 通过 `https://api.anthropic.com/v1/messages` 调用
+- 支持通过 `baseUrl` 走代理或兼容实现
 
-### 阿里云通义千问 ⭐
+### Gemini
 
-- **模型**: qwen-turbo, qwen-plus, qwen-max, qwen-max-longcontext
-- **获取密钥**: [阿里云 DashScope](https://dashscope.console.aliyun.com/)
-- **环境变量**: `TONGYI_API_KEY`
-- **特点**: 中文优化，国内访问稳定
-
-### 本地规则生成
-
-- **无需 API**: 完全本地运行
-- **无网络要求**: 离线可用
-- **免费使用**: 无任何费用
-- **特点**: 快速稳定，作为 AI 的回退方案
+- 通过 Google Generative Language API 调用
+- 支持通过 `baseUrl` 走网关
 
 ---
 
-## 🎯 使用方法
+## 使用方法
 
-### 基本使用流程
+### 生成流程
 
-1. **修改代码**: 在 Git 仓库中进行代码修改
-2. **暂存更改**: `git add .` 或选择性暂存文件
-3. **打开源码管理**: 按 `Ctrl+Shift+G`
-4. **生成提交信息**: 点击源码管理标题栏右侧的 ✨ 按钮
-5. **检查并提交**: 检查生成的信息，点击提交
+1. 读取当前 Git 暂存区 diff。
+2. 构造 prompt，请模型返回固定格式的 `git commit -m` 命令。
+3. 从命令中解析 `-m` 参数。
+4. 将解析后的提交标题和正文写入源码管理输入框。
 
-### 生成效果对比
+### 实际示例
 
-#### 本地生成
+模型返回：
 
-```
-feat: add new features to src/extension.ts
-
-- Added 120 lines
-- Removed 15 lines
+```bash
+git commit -m "fix(parser): 修复提交信息解析失败问题" -m "修正 -m 参数的正则匹配逻辑，避免标准命令格式无法提取正文"
 ```
 
-#### AI 生成（OpenAI）
+扩展写入输入框的内容：
 
-```
-feat: implement AI-powered commit message generation
+```text
+fix(parser): 修复提交信息解析失败问题
 
-Add comprehensive AI integration supporting multiple providers including
-OpenAI, Claude, Gemini, and Tongyi. Includes intelligent fallback
-mechanism and configurable generation styles.
-```
-
-#### AI 生成（通义千问）
-
-```
-feat: 实现AI驱动的提交信息生成功能
-
-集成多个AI提供商支持，包括OpenAI、Claude、Gemini和通义千问，
-添加智能回退机制和可配置的生成风格，提升开发者提交信息质量。
+修正 -m 参数的正则匹配逻辑，避免标准命令格式无法提取正文
 ```
 
 ---
 
-## 🎨 自定义设置
+## 自定义设置
 
-### 环境变量配置（推荐）
+### 环境变量示例
 
 #### Windows
 
 ```cmd
 setx OPENAI_API_KEY "your-openai-key"
-setx TONGYI_API_KEY "your-tongyi-key"
+setx OPENAI_BASE_URL "http://localhost:8000/v1"
+setx OPENAI_MODEL "gpt-4o-mini"
 ```
 
 #### macOS/Linux
 
 ```bash
 export OPENAI_API_KEY="your-openai-key"
-export TONGYI_API_KEY="your-tongyi-key"
-echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
+export OPENAI_BASE_URL="http://localhost:8000/v1"
+export OPENAI_MODEL="gpt-4o-mini"
 ```
 
 ### 配置示例
 
-#### OpenAI 配置
+#### OpenAI
 
 ```json
 {
   "hebai-ai-git-commit.aiProvider": "openai",
-  "hebai-ai-git-commit.model": "gpt-3.5-turbo",
-  "hebai-ai-git-commit.language": "zh",
-  "hebai-ai-git-commit.commitStyle": "conventional"
+  "hebai-ai-git-commit.baseUrl": "http://localhost:8000/v1",
+  "hebai-ai-git-commit.apiKey": "your-api-key",
+  "hebai-ai-git-commit.model": "gpt-4o-mini"
 }
 ```
 
-#### 通义千问配置
+#### OpenAI Responses API
 
 ```json
 {
-  "hebai-ai-git-commit.aiProvider": "tongyi",
-  "hebai-ai-git-commit.model": "qwen-turbo",
-  "hebai-ai-git-commit.language": "zh",
-  "hebai-ai-git-commit.commitStyle": "conventional"
+  "hebai-ai-git-commit.aiProvider": "openai-response",
+  "hebai-ai-git-commit.baseUrl": "https://api.openai.com/v1",
+  "hebai-ai-git-commit.apiKey": "your-api-key",
+  "hebai-ai-git-commit.model": "gpt-4.1-mini"
 }
 ```
 
 ---
 
-## 🔧 故障排除
+## 故障排除
 
-### 常见问题
+### 按钮不显示
 
-#### 按钮不显示
+- 确保当前工作区是 Git 仓库。
+- 确保你打开的是源码管理视图。
+- 如果刚安装扩展，尝试重载窗口。
 
-- 确保在 Git 仓库中工作
-- 检查扩展是否激活
-- 重启 VS Code
+### `openai-response` 返回 `500 not implemented`
 
-#### API 密钥无效
+这通常表示你填写的 `baseUrl` 不支持 `/v1/responses`。
 
-- 检查 API 密钥是否正确
-- 确认 API 服务是否有余额
-- 验证环境变量是否设置正确
+处理方式：
 
-#### 网络连接问题
+- 将 provider 改为 `openai`
+- 或换成明确支持 Responses API 的服务
 
-- 检查网络连接
-- 国内用户访问 OpenAI 可能需要代理
-- 尝试使用通义千问（国内访问更稳定）
+### AI 返回了 git commit 命令，但解析失败
 
-#### AI 生成失败
+扩展会在控制台打印：
 
-- 扩展会自动回退到本地生成
-- 检查控制台错误信息
-- 验证模型名称是否正确
+- `AI 原始返回:`
+- `AI 原始返回（标准化后）:`
 
-### 调试方法
+可根据这两条日志判断模型是否返回了非标准命令格式。
 
-1. 按 `F12` 打开开发者工具
-2. 查看 Console 标签页的错误信息
-3. 在 Network 标签页检查 API 请求
+### 网络连接问题
+
+- 检查基础请求地址是否正确。
+- 检查 API Key 是否有效。
+- 检查模型名是否与目标服务兼容。
 
 ---
 
-## 🛠️ 开发说明
+## 开发说明
 
 ### 技术架构
 
-- **OpenAI SDK**: 统一调用 OpenAI 和通义千问
-- **Axios**: 调用 Claude 和 Gemini 专有 API
-- **智能回退**: AI 失败时自动使用本地生成
-- **TypeScript**: 完整的类型安全
+- OpenAI SDK：用于 OpenAI 和 OpenAI Responses API
+- Axios：用于 Claude 和 Gemini
+- Prompt 约束：固定要求返回 `git commit -m` 命令
+- 解析器：提取 `-m` 参数内容并写入 SCM 输入框
 
 ### 项目结构
 
-```
+```text
 hebai-ai-git-commit/
 ├── src/
 │   ├── extension.ts                  # 扩展入口与命令注册
@@ -286,52 +243,29 @@ hebai-ai-git-commit/
 │           ├── git.ts                # Git 与 SCM 交互
 │           ├── constants.ts          # 功能常量
 │           ├── types.ts              # 共享类型
-│           └── cleanCommitMessage.ts # AI 输出清洗
-├── package.json              # 扩展配置和依赖
-├── README.md                 # 项目说明（本文档）
-└── dist/                     # 编译输出
+│           └── cleanCommitMessage.ts # AI 输出清洗与命令解析
+├── package.json
+├── README.md
+└── dist/
 ```
 
-### 编译和测试
+### 编译与调试
 
 ```bash
-# 安装依赖
 pnpm install
-
-# 编译扩展
-pnpm run compile
-
-# 启动调试
-按 F5 键
+pnpm run build
 ```
+
+调试扩展时，在 VS Code 中按 `F5` 启动扩展宿主。
 
 ### 系统要求
 
 - VS Code 1.102.0+
-- Git 已安装并配置
+- Git 已安装并可在命令行中调用
 - 当前工作区必须是 Git 仓库
 
 ---
-## 🎉 总结
 
-Hebai AI Git Commit 提供了完整的 AI 驱动提交信息生成解决方案：
-
-1. **即开即用**: 默认本地生成，无需配置
-2. **AI 增强**: 支持主流 AI 提供商
-3. **智能回退**: 确保功能始终可用
-4. **高度可配置**: 满足不同用户需求
-5. **安全可靠**: 支持环境变量配置
-
-现在就开始使用吧！按 `F5` 启动调试，体验 AI 驱动的智能提交信息生成！🚀
-
-## 📄 许可证
+## 许可证
 
 MIT
-
-## 🔒 版权声明
-
-© 2026 Hebai. All rights reserved.
-
-"Hebai AI 智能提交" 是 [Hebai](https://hebai.com) 的商标。未经许可，禁止使用本商标或类似标识。
-
-本扩展的核心算法、用户界面设计和品牌标识均受版权法保护。

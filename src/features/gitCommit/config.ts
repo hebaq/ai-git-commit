@@ -7,13 +7,13 @@ function getDefaultModel(provider: AIProvider): string {
 	switch (provider) {
 		case 'openai':
 		case 'openai-response':
-			return 'gpt-3.5-turbo';
+			return 'gpt-5.4';
 		case 'claude':
-			return 'claude-3-sonnet-20240229';
+			return 'claude-sonnet-4.5';
 		case 'gemini':
-			return 'gemini-pro';
+			return 'gemini-3-flash-preview';
 		default:
-			return 'gpt-3.5-turbo';
+			return 'gpt-5.4';
 	}
 }
 
