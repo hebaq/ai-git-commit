@@ -4,7 +4,7 @@
 
 ## 🎯 项目概览
 
-**LaFu AI Git Commit** - 一个 VS Code 扩展，使用 AI 自动生成 Git 提交信息。扩展支持多个 AI 提供商（OpenAI、Claude、Gemini、通义），在 AI 失败时会智能回退到本地生成。
+**Hebai AI Git Commit** - 一个 VS Code 扩展，使用 AI 自动生成 Git 提交信息。扩展支持多个 AI 提供商（OpenAI、Claude、Gemini、通义），在 AI 失败时会智能回退到本地生成。
 
 **技术栈：**
 - TypeScript + ES2022
@@ -60,7 +60,7 @@ generateCommitMessage()
 ### 关键组件
 
 **配置系统（`getAIConfig()`）：**
-- 从 VS Code 工作区配置读取设置（`lafucode-ai-git-commit.*`）
+- 从 VS Code 工作区配置读取设置（`hebai-ai-git-commit.*`）
 - 回退到环境变量：`OPENAI_API_KEY`、`CLAUDE_API_KEY`、`GEMINI_API_KEY`、`TONGYI_API_KEY`
 - 若未配置，按提供商自动选择默认模型
 
@@ -86,10 +86,14 @@ generateCommitMessage()
 
 1. 解析 Diff，统计新增/删除行数，提取文件路径
 2. 判断变更类型：
-   - `add`：新增行数 > 删除行数 × 2
-   - `remove`：删除行数 > 新增行数 × 2
-   - `fix`：单个文件修改
-   - `update`：默认回退
+  - `docs`：仅文档文件变更
+  - `test`：仅测试文件变更
+  - `ci`：仅 CI 文件变更
+  - `build`：仅构建/依赖/配置文件变更
+  - `feat`：新增行数明显大于删除行数
+  - `refactor`：删除行数明显大于新增行数
+  - `fix`：单个文件修改
+  - `chore`：默认回退
 3. 使用文件列表（前 3 个文件）和行数统计格式化消息
 4. 针对每种变更类型的语言特定模板
 
@@ -97,17 +101,18 @@ generateCommitMessage()
 
 ```
 src/
-├── extension.ts          # 扩展主要逻辑（单文件设计）
-│   ├── activate()        # 入口点，注册命令
-│   ├── getAIConfig()     # 加载配置
-│   ├── generateCommitMessage()
-│   ├── analyzeChangesAndGenerateMessage()
-│   ├── generateLocalCommitMessage()
-│   ├── buildPrompt()
-│   ├── callWithOpenAISDK()
-│   ├── callClaude()
-│   ├── callGemini()
-│   └── setCommitMessage()
+├── extension.ts                  # 扩展入口与命令注册
+└── features/
+  └── gitCommit/
+    ├── commands.ts           # 提交信息生成流程
+    ├── config.ts             # VS Code 配置读取
+    ├── diffAnalysis.ts       # Diff 摘要与 scope 分析
+    ├── prompt.ts             # AI 提示词构建
+    ├── aiProviders.ts        # OpenAI/Claude/Gemini/openai-response 调用
+    ├── git.ts                # Git 与 SCM 交互
+    ├── constants.ts          # 功能常量
+    ├── types.ts              # 共享类型
+    └── cleanCommitMessage.ts # AI 输出清洗
 dist/                     # Webpack 输出（extension.js）
 webpack.config.js         # 单个 Node.js 目标配置
 tsconfig.json            # 启用严格模式
@@ -149,7 +154,7 @@ README.md                # 用户文档
 
 ## ⚙️ 配置键参考
 
-所有设置存储在 `lafucode-ai-git-commit` 作用域下：
+所有设置存储在 `hebai-ai-git-commit` 作用域下：
 - `aiProvider` - 提供商选择
 - `apiKey` - 可选 API 密钥（优先使用环境变量：`OPENAI_API_KEY`、`CLAUDE_API_KEY` 等）
 - `model` - 模型名称，支持任意自定义值
@@ -165,7 +170,7 @@ README.md                # 用户文档
 
 ## 🐛 已知实现细节
 
-1. **单文件设计**：所有扩展逻辑在 `extension.ts` 中（便于部署）
+1. **模块化设计**：按入口、配置、diff 分析、prompt、provider、Git 交互拆分，便于后续改名和扩展功能
 2. **Diff 截断**：限制为 3000 字符以防止 Token 溢出；不影响提交质量
 3. **回退可靠性**：本地生成保证即使所有 AI 提供商都失败也能生成提交信息
 4. **VS Code Git API**：使用 Git 扩展公开 API 将提交信息注入输入框
@@ -189,9 +194,9 @@ export OPENAI_API_KEY="your-api-key"
 **场景 2：VS Code 设置中配置**
 ```json
 {
-  "lafucode-ai-git-commit.aiProvider": "openai",
-  "lafucode-ai-git-commit.openaiBaseUrl": "http://localhost:8000/v1",
-  "lafucode-ai-git-commit.apiKey": "your-api-key"
+  "hebai-ai-git-commit.aiProvider": "openai",
+  "hebai-ai-git-commit.openaiBaseUrl": "http://localhost:8000/v1",
+  "hebai-ai-git-commit.apiKey": "your-api-key"
 }
 ```
 
@@ -207,9 +212,9 @@ export CLAUDE_API_KEY="your-api-key"
 **场景 2：私有部署 Claude 兼容服务**
 ```json
 {
-  "lafucode-ai-git-commit.aiProvider": "claude",
-  "lafucode-ai-git-commit.claudeBaseUrl": "https://your-custom-domain.com",
-  "lafucode-ai-git-commit.model": "claude-3-sonnet-20240229"
+  "hebai-ai-git-commit.aiProvider": "claude",
+  "hebai-ai-git-commit.claudeBaseUrl": "https://your-custom-domain.com",
+  "hebai-ai-git-commit.model": "claude-3-sonnet-20240229"
 }
 ```
 
@@ -233,8 +238,8 @@ export CLAUDE_API_KEY="your-api-key"
 #### 方式 1：VS Code 设置中指定
 ```json
 {
-  "lafucode-ai-git-commit.aiProvider": "openai",
-  "lafucode-ai-git-commit.model": "gpt-4-turbo"
+  "hebai-ai-git-commit.aiProvider": "openai",
+  "hebai-ai-git-commit.model": "gpt-4-turbo"
 }
 ```
 
@@ -265,10 +270,10 @@ export TONGYI_MODEL="qwen-max"
 #### 场景 1：使用最新的 Claude 模型
 ```json
 {
-  "lafucode-ai-git-commit.aiProvider": "claude",
-  "lafucode-ai-git-commit.model": "claude-3-5-sonnet-20241022",
-  "lafucode-ai-git-commit.claudeBaseUrl": "https://api.anthropic.com",
-  "lafucode-ai-git-commit.apiKey": "your-api-key"
+  "hebai-ai-git-commit.aiProvider": "claude",
+  "hebai-ai-git-commit.model": "claude-3-5-sonnet-20241022",
+  "hebai-ai-git-commit.claudeBaseUrl": "https://api.anthropic.com",
+  "hebai-ai-git-commit.apiKey": "your-api-key"
 }
 ```
 

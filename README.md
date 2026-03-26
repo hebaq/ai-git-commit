@@ -1,4 +1,4 @@
-# LaFu AI Git Commit
+# Hebai AI Git Commit
 
 🤖 一个智能的 VS Code 扩展，使用 AI 自动生成 Git 提交信息。
 
@@ -38,7 +38,7 @@
 
 ### 启用 AI 功能
 
-1. **打开设置**：按 `Ctrl+,` 搜索 "LaFu AI Git Commit"
+1. **打开设置**：按 `Ctrl+,` 搜索 "Hebai AI Git Commit"
 2. **配置 AI 提供商**：选择 OpenAI/Claude/Gemini/通义千问
 3. **设置 API 密钥**：输入密钥或使用环境变量
 4. **开始使用**：点击 ✨ 按钮享受 AI 生成
@@ -95,7 +95,7 @@
 
 #### 搜索配置
 
-在设置搜索框中输入：`lafucode-ai-git-commit`
+在设置搜索框中输入：`hebai-ai-git-commit`
 
 ---
 
@@ -205,10 +205,10 @@ echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
 
 ```json
 {
-  "lafucode-ai-git-commit.aiProvider": "openai",
-  "lafucode-ai-git-commit.model": "gpt-3.5-turbo",
-  "lafucode-ai-git-commit.language": "zh",
-  "lafucode-ai-git-commit.commitStyle": "conventional"
+  "hebai-ai-git-commit.aiProvider": "openai",
+  "hebai-ai-git-commit.model": "gpt-3.5-turbo",
+  "hebai-ai-git-commit.language": "zh",
+  "hebai-ai-git-commit.commitStyle": "conventional"
 }
 ```
 
@@ -216,10 +216,10 @@ echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
 
 ```json
 {
-  "lafucode-ai-git-commit.aiProvider": "tongyi",
-  "lafucode-ai-git-commit.model": "qwen-turbo",
-  "lafucode-ai-git-commit.language": "zh",
-  "lafucode-ai-git-commit.commitStyle": "conventional"
+  "hebai-ai-git-commit.aiProvider": "tongyi",
+  "hebai-ai-git-commit.model": "qwen-turbo",
+  "hebai-ai-git-commit.language": "zh",
+  "hebai-ai-git-commit.commitStyle": "conventional"
 }
 ```
 
@@ -273,8 +273,20 @@ echo 'export OPENAI_API_KEY="your-openai-key"' >> ~/.bashrc
 ### 项目结构
 
 ```
-lafucode-ai-git-commit/
-├── src/extension.ts          # 扩展主要代码
+hebai-ai-git-commit/
+├── src/
+│   ├── extension.ts                  # 扩展入口与命令注册
+│   └── features/
+│       └── gitCommit/
+│           ├── commands.ts           # 提交信息生成流程
+│           ├── config.ts             # VS Code 配置读取
+│           ├── diffAnalysis.ts       # Diff 摘要与 scope 分析
+│           ├── prompt.ts             # AI 提示词构建
+│           ├── aiProviders.ts        # OpenAI/Claude/Gemini/openai-response 调用
+│           ├── git.ts                # Git 与 SCM 交互
+│           ├── constants.ts          # 功能常量
+│           ├── types.ts              # 共享类型
+│           └── cleanCommitMessage.ts # AI 输出清洗
 ├── package.json              # 扩展配置和依赖
 ├── README.md                 # 项目说明（本文档）
 └── dist/                     # 编译输出
@@ -302,7 +314,7 @@ pnpm run compile
 ---
 ## 🎉 总结
 
-LaFu AI Git Commit 提供了完整的 AI 驱动提交信息生成解决方案：
+Hebai AI Git Commit 提供了完整的 AI 驱动提交信息生成解决方案：
 
 1. **即开即用**: 默认本地生成，无需配置
 2. **AI 增强**: 支持主流 AI 提供商
@@ -318,8 +330,8 @@ MIT
 
 ## 🔒 版权声明
 
-© 2025 LaFu Code. All rights reserved.
+© 2026 Hebai. All rights reserved.
 
-"LaFu AI 智能提交" 是 [LaFu Code](https://lafucode.com) 的商标。未经许可，禁止使用本商标或类似标识。
+"Hebai AI 智能提交" 是 [Hebai](https://hebai.com) 的商标。未经许可，禁止使用本商标或类似标识。
 
 本扩展的核心算法、用户界面设计和品牌标识均受版权法保护。

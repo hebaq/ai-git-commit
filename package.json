@@ -1,6 +1,6 @@
 {
-  "name": "hebaq-ai-git-commit",
-  "publisher": "hebaq",
+  "name": "hebai-ai-git-commit",
+  "publisher": "hebai",
   "displayName": "AI 智能提交",
   "description": "AI 驱动的智能 Git 提交信息生成器，支持多种 AI 提供商和本地生成",
   "version": "1.0.3",
@@ -10,12 +10,12 @@
   "pricing": "Free",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hebaq/ai-git-commit"
+    "url": "https://github.com/hebai/ai-git-commit"
   },
   "author": {
     "name": "禾白"
   },
-  "copyright": "Copyright (c) 2025 LaFu Code. All rights reserved.",
+  "copyright": "Copyright (c) 2026 Hebai. All rights reserved.",
   "icon": "resources/icon.jpeg",
   "galleryBanner": {
     "color": "#1e1e1e",
@@ -27,8 +27,7 @@
     "ai",
     "openai",
     "claude",
-    "gemini",
-    "tongyi"
+    "gemini"
   ],
   "license": "MIT",
   "categories": [
@@ -42,113 +41,60 @@
   "contributes": {
     "commands": [
       {
-        "command": "lafucode-ai-git-commit.generateCommitMessage",
-        "title": "生成提交信息",
-        "icon": "$(sparkle)"
+        "command": "hebai-ai-git-commit.generateCommitMessage",
+		"title": "生成提交信息",
+		"icon": "$(sparkle)"
       },
       {
-        "command": "lafucode-ai-git-commit.openSettings",
-        "title": "打开 LaFu AI Git Commit 设置"
+        "command": "hebai-ai-git-commit.openSettings",
+        "title": "打开 Hebai AI Git Commit 设置"
       }
     ],
     "configuration": {
-      "title": "LaFu AI Git Commit",
+      "title": "Hebai AI Git Commit",
       "properties": {
-        "lafucode-ai-git-commit.aiProvider": {
+        "hebai-ai-git-commit.aiProvider": {
           "type": "string",
           "enum": [
-            "local",
             "openai",
+            "openai-response",
             "claude",
-            "gemini",
-            "tongyi"
+            "gemini"
           ],
-          "default": "local",
+          "default": "openai",
           "description": "选择 AI 提供商",
-          "markdownDescription": "## 🤖 AI 提供商\n选择用于生成提交信息的 AI 服务",
+          "markdownDescription": "选择用于生成提交信息的 AI 服务",
           "enumDescriptions": [
-            "本地规则生成（无需 API，免费使用）",
             "OpenAI (GPT-3.5/GPT-4)",
+            "OpenAI Responses API (/v1/responses)",
             "Anthropic Claude",
-            "Google Gemini",
-            "阿里云通义灵码"
+            "Google Gemini"
           ]
         },
-        "lafucode-ai-git-commit.apiKey": {
+        "hebai-ai-git-commit.baseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "基础请求地址",
+          "markdownDescription": "用于自定义 API 基础地址。留空则按提供商使用默认地址。可配合环境变量 `AI_BASE_URL`、`OPENAI_BASE_URL`、`CLAUDE_BASE_URL`、`GEMINI_BASE_URL`。"
+        },
+        "hebai-ai-git-commit.apiKey": {
           "type": "string",
           "default": "",
           "description": "AI API 密钥",
-          "markdownDescription": "## 🔑 API 密钥\nAI 服务的 API 密钥。**建议使用环境变量**：\n- OpenAI: `OPENAI_API_KEY`\n- Claude: `CLAUDE_API_KEY`\n- Gemini: `GEMINI_API_KEY`\n- 通义灵码: `TONGYI_API_KEY`"
+          "markdownDescription": "AI 服务的 API 密钥。建议使用环境变量：`OPENAI_API_KEY`、`CLAUDE_API_KEY`、`GEMINI_API_KEY`。"
         },
-        "lafucode-ai-git-commit.model": {
+        "hebai-ai-git-commit.model": {
           "type": "string",
           "default": "gpt-3.5-turbo",
           "description": "AI 模型名称",
-          "markdownDescription": "## 🤖 模型选择\n根据选择的 AI 提供商输入对应的模型名称。支持任意自定义模型名称（用于私有部署或兼容 API）。\n\n**预设模型（推荐）**：\n- **OpenAI**: `gpt-3.5-turbo`, `gpt-4`, `gpt-4-turbo`, `gpt-4o`, `gpt-4o-mini`\n- **Claude**: `claude-3-opus-20240229`, `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`\n- **Gemini**: `gemini-pro`, `gemini-1.5-pro`, `gemini-1.5-flash`\n- **通义灵码**: `qwen-turbo`, `qwen-plus`, `qwen-max`, `qwen-max-longcontext`\n\n**自定义模型**：直接输入任意模型名称即可，也可通过环境变量配置：`OPENAI_MODEL`, `CLAUDE_MODEL`, `GEMINI_MODEL`, `TONGYI_MODEL`"
-        },
-        "lafucode-ai-git-commit.language": {
-          "type": "string",
-          "enum": [
-            "zh",
-            "en"
-          ],
-          "default": "zh",
-          "description": "提交信息语言",
-          "markdownDescription": "## ⚙️ 生成设置\n选择提交信息的语言",
-          "enumDescriptions": [
-            "中文",
-            "English"
-          ]
-        },
-        "lafucode-ai-git-commit.commitStyle": {
-          "type": "string",
-          "enum": [
-            "conventional",
-            "simple",
-            "detailed"
-          ],
-          "default": "conventional",
-          "description": "提交信息风格",
-          "enumDescriptions": [
-            "Conventional Commits 规范",
-            "简洁风格",
-            "详细描述"
-          ]
-        },
-        "lafucode-ai-git-commit.maxTokens": {
-          "type": "number",
-          "default": 200,
-          "minimum": 50,
-          "maximum": 1000,
-          "description": "AI 响应最大 token 数",
-          "markdownDescription": "## 🔧 高级设置\n控制 AI 响应的最大长度（影响 API 费用）"
-        },
-        "lafucode-ai-git-commit.temperature": {
-          "type": "number",
-          "default": 0.3,
-          "minimum": 0,
-          "maximum": 1,
-          "description": "AI 创造性程度",
-          "markdownDescription": "控制 AI 的创造性程度：\n- **0** = 保守准确\n- **1** = 创新多样"
-        },
-        "lafucode-ai-git-commit.openaiBaseUrl": {
-          "type": "string",
-          "default": "",
-          "description": "OpenAI 自定义 Base URL",
-          "markdownDescription": "## 🌐 OpenAI 自定义 Base URL\n用于代理、兼容 API 或私有部署。**留空则使用官方 API**。\n\n**示例**：\n- 代理：`https://api.openai.com/v1` 或 `http://localhost:8000/v1`\n- 私有部署：`https://your-custom-domain.com/v1`\n\n**环境变量**：`OPENAI_BASE_URL`（优先级高于此配置）"
-        },
-        "lafucode-ai-git-commit.claudeBaseUrl": {
-          "type": "string",
-          "default": "",
-          "description": "Claude 自定义 Base URL",
-          "markdownDescription": "## 🌐 Claude 自定义 Base URL\n用于代理或兼容实现。**留空则使用官方 API**。\n\n**示例**：\n- 官方：`https://api.anthropic.com`\n- 代理：`https://proxy.example.com`\n- 私有部署：`https://your-custom-domain.com`\n\n**环境变量**：`CLAUDE_BASE_URL`（优先级高于此配置）"
+          "markdownDescription": "根据选择的 AI 提供商输入模型名称。可通过环境变量覆盖：`OPENAI_MODEL`、`CLAUDE_MODEL`、`GEMINI_MODEL`。"
         }
       }
     },
     "menus": {
       "scm/title": [
         {
-          "command": "lafucode-ai-git-commit.generateCommitMessage",
+          "command": "hebai-ai-git-commit.generateCommitMessage",
           "when": "scmProvider == git",
           "group": "navigation"
         }
@@ -156,7 +102,7 @@
     },
     "keybindings": [
       {
-        "command": "lafucode-ai-git-commit.generateCommitMessage",
+        "command": "hebai-ai-git-commit.generateCommitMessage",
         "key": "ctrl+shift+g ctrl+shift+a",
         "when": "scmProvider == git"
       }
