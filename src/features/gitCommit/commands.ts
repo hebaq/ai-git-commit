@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { generateAICommitMessage } from './aiProviders';
 import { getAIConfig } from './config';
 import { CONFIG_NAMESPACE } from './constants';
-import { ensureGitRepository, getDiffForCommitMessage, getWorkspacePath, setCommitMessage } from './git';
+import { ensureGitRepository, getDiffForCommitMessage, resolveGitRepository, setCommitMessage } from './git';
 import { logDebug, logError, logGeneratedCommitMessage, logInfo, showOutputChannel } from './output';
 import type { AIConfig } from './types';
 
@@ -23,19 +23,21 @@ async function analyzeChangesAndGenerateMessage(diffOutput: string, config: AICo
 	}
 }
 
-export async function handleGenerateCommitMessage(): Promise<void> {
+export async function handleGenerateCommitMessage(commandContext?: unknown): Promise<void> {
 	logDebug('开始生成提交信息...');
 
-	const workspacePath = getWorkspacePath();
+	const { repository, workspacePath } = await resolveGitRepository(commandContext);
+	logDebug(`目标 Git 仓库: ${workspacePath}`);
+
 	await ensureGitRepository(workspacePath);
 
 	const diffOutput = await getDiffForCommitMessage(workspacePath);
 	const config = getAIConfig();
 	const commitMessage = await analyzeChangesAndGenerateMessage(diffOutput, config);
 
-	await setCommitMessage(commitMessage);
+	await setCommitMessage(commitMessage, repository);
 	logGeneratedCommitMessage(commitMessage);
-	logInfo('提交信息已写入源码管理输入框');
+	logInfo(`提交信息已写入源码管理输入框: ${workspacePath}`);
 	showOutputChannel(true);
 	vscode.window.showInformationMessage('提交信息生成成功');
 }

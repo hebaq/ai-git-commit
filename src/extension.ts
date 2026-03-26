@@ -24,14 +24,14 @@ export function activate(context: vscode.ExtensionContext) {
 	logDebug('Hebai AI 智能提交扩展已激活');
 	logDebug(`${AUTHOR_SIGNATURE} - 扩展ID: ${EXTENSION_ID}`);
 
-	const generateDisposable = vscode.commands.registerCommand(GENERATE_COMMIT_MESSAGE_COMMAND, async () => {
+	const generateDisposable = vscode.commands.registerCommand(GENERATE_COMMIT_MESSAGE_COMMAND, async (...commandArgs: unknown[]) => {
 		await vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
 			title: GENERATE_PROGRESS_TITLE,
 			cancellable: false
 		}, async () => {
 			try {
-				await handleGenerateCommitMessage();
+				await handleGenerateCommitMessage(commandArgs.length <= 1 ? commandArgs[0] : commandArgs);
 			} catch (error) {
 				logError('生成提交信息时出错:', error);
 				showOutputChannel(true);
