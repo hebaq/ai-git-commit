@@ -47,7 +47,7 @@ async function callWithOpenAISDK(prompt: string, config: AIConfig): Promise<stri
 
 	const rawMessage = response.choices[0].message.content?.trim() || '';
 	logDebug(`AI 原始返回: ${rawMessage}`);
-	return cleanCommitMessage(rawMessage);
+	return rawMessage;
 }
 
 async function callWithOpenAIResponsesAPI(prompt: string, config: AIConfig): Promise<string> {
@@ -59,7 +59,7 @@ async function callWithOpenAIResponsesAPI(prompt: string, config: AIConfig): Pro
 
 	const rawMessage = response.output_text?.trim() || '';
 	logDebug(`AI 原始返回: ${rawMessage}`);
-	return cleanCommitMessage(rawMessage);
+	return rawMessage;
 }
 
 async function callClaude(prompt: string, config: AIConfig): Promise<string> {
@@ -88,7 +88,7 @@ async function callClaude(prompt: string, config: AIConfig): Promise<string> {
 
 	const rawMessage = response.data.content[0].text.trim();
 	logDebug(`AI 原始返回: ${rawMessage}`);
-	return cleanCommitMessage(rawMessage);
+	return rawMessage;
 }
 
 async function callGemini(prompt: string, config: AIConfig): Promise<string> {
@@ -115,11 +115,10 @@ async function callGemini(prompt: string, config: AIConfig): Promise<string> {
 
 	const rawMessage = response.data.candidates[0].content.parts[0].text.trim();
 	logDebug(`AI 原始返回: ${rawMessage}`);
-	return cleanCommitMessage(rawMessage);
+	return rawMessage;
 }
 
-export async function generateAICommitMessage(diffOutput: string, config: AIConfig): Promise<string> {
-	const prompt = buildPrompt(diffOutput, config);
+export async function generateAIText(prompt: string, config: AIConfig): Promise<string> {
 
 	if (config.provider === 'openai') {
 		return callWithOpenAISDK(prompt, config);
@@ -137,4 +136,10 @@ export async function generateAICommitMessage(diffOutput: string, config: AIConf
 		default:
 			throw new Error(`不支持的 AI 提供商: ${config.provider}`);
 	}
+}
+
+export async function generateAICommitMessage(diffOutput: string, config: AIConfig): Promise<string> {
+	const prompt = buildPrompt(diffOutput, config);
+	const rawMessage = await generateAIText(prompt, config);
+	return cleanCommitMessage(rawMessage);
 }

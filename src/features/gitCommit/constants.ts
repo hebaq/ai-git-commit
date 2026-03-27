@@ -1,11 +1,27 @@
 export const CONFIG_NAMESPACE = 'hebai-ai-git-commit';
+export const PROVIDER_PROFILES_SETTING = 'profiles';
+export const ACTIVE_PROVIDER_PROFILE_ID_SETTING = 'activeProfileId';
 export const GENERATE_COMMIT_MESSAGE_COMMAND = `${CONFIG_NAMESPACE}.generateCommitMessage`;
 export const OPEN_SETTINGS_COMMAND = `${CONFIG_NAMESPACE}.openSettings`;
+export const TEST_MODEL_CONNECTION_COMMAND = `${CONFIG_NAMESPACE}.testModelConnection`;
+export const ADD_PROVIDER_PROFILE_COMMAND = `${CONFIG_NAMESPACE}.addProviderProfile`;
+export const EDIT_PROVIDER_PROFILE_COMMAND = `${CONFIG_NAMESPACE}.editProviderProfile`;
+export const DELETE_PROVIDER_PROFILE_COMMAND = `${CONFIG_NAMESPACE}.deleteProviderProfile`;
+export const ACTIVATE_PROVIDER_PROFILE_COMMAND = `${CONFIG_NAMESPACE}.activateProviderProfile`;
+export const REFRESH_PROVIDER_PROFILES_COMMAND = `${CONFIG_NAMESPACE}.refreshProviderProfiles`;
 export const OUTPUT_CHANNEL_NAME = 'Hebai AI Git Commit';
 export const ENABLE_DEBUG_LOGS_SETTING = 'enableDebugLogs';
 
 export const EXTENSION_ID = 'hebai-ai-git-commit-v1.0';
 export const AUTHOR_SIGNATURE = 'Hebai © 2026';
 export const GENERATE_PROGRESS_TITLE = '正在生成提交信息...';
+export const TEST_MODEL_PROGRESS_TITLE = '正在测试模型连接...';
 export const AI_RESPONSE_MAX_TOKENS = 400;
 export const AI_RESPONSE_TEMPERATURE = 0.1;
+export const TEST_MODEL_PROMPT = 'who are you?';
+export const PROVIDER_MANAGEMENT_PANEL_ID = `${CONFIG_NAMESPACE}.providerManagement`;
+export const PROVIDER_MANAGEMENT_PANEL_TITLE = '助手管理';
+export const PROVIDER_MANAGEMENT_VIEW_CONTAINER_ID = 'hebai-ai-git-commit-views';
+export const PROVIDER_MANAGEMENT_VIEW_ID = 'hebai-ai-git-commit-provider-management-view';
+export const PROVIDER_PROFILE_ITEM_CONTEXT = 'providerProfile';
+export const ACTIVE_PROVIDER_PROFILE_ITEM_CONTEXT = 'providerProfileActive';

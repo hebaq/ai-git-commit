@@ -18,6 +18,7 @@
 ## 功能特性
 
 - 支持 OpenAI、OpenAI Responses API、Claude、Gemini
+- 支持通过左侧活动栏中的原生配置列表维护多套模型配置，完成新增、编辑、删除、切换激活配置和拖拽排序
 - 支持多 Git 仓库工作区，点击哪个仓库上的按钮就为哪个仓库生成提交信息
 - 点击源码管理标题栏右侧的图标即可生成提交信息
 - 固定输出 Conventional Commits 风格的中文提交信息
@@ -38,53 +39,41 @@
 
 ### 首次配置
 
-1. 按 `Ctrl+,` 打开设置，搜索 `Hebai AI Git Commit`。
-2. 选择 AI 提供商。
-3. 填写基础请求地址、API Key、模型。
-4. 回到源码管理面板，点击生成按钮。
+1. 点击左侧活动栏中的“助手管理”视图，或打开命令面板运行“打开助手管理”。
+2. 在标题栏点击“新增 AI 配置”，按顺序填写配置名称、供应商、API Key、模型和可选的 Base URL。
+3. 在配置列表中使用行内按钮或右键菜单，将目标配置设为激活配置。
+4. 在配置列表中直接测试某条配置，或从命令面板运行“测试当前激活配置”，确认模型可用。
+5. 回到源码管理面板，点击生成按钮。
 
 ---
 
 ## 配置指南
 
-当前设置页包含 5 项：
+当前主要通过原生配置列表维护配置。设置页默认只显示 1 项手动配置：
 
-1. `aiProvider`
-2. `baseUrl`
-3. `apiKey`
-4. `model`
-5. `enableDebugLogs`
+1. `enableDebugLogs`
 
-### 1. AI 提供商
+扩展仍会在内部持久化 `activeProfileId` 和 `profiles`，但它们不再出现在设置页里。
 
-可选值：
+### 1. 配置管理页
 
-- `openai`
-- `openai-response`
-- `claude`
-- `gemini`
+- 入口命令：`打开助手管理`
+- 入口视图：左侧活动栏中的 `助手管理` -> `助手管理`
+- 支持通过原生 TreeView 列表执行新增、编辑、删除、切换激活配置、测试连接和拖拽排序。
+- 每条配置都包含 `name`、`provider`、`apiKey`、`model`、`baseUrl`。
 
-### 2. 基础请求地址
+### 2. 当前激活配置
 
-- 留空时使用各 provider 的默认地址。
-- 可用于代理、兼容网关或私有部署。
-- 支持环境变量：`AI_BASE_URL`、`OPENAI_BASE_URL`、`CLAUDE_BASE_URL`、`GEMINI_BASE_URL`
+- 生成提交信息和命令面板中的“测试当前激活配置”，都会使用当前激活的那条配置。
+- 如果没有激活配置，扩展会提示你先打开管理页创建一条。
 
-### 3. API Key
+### 3. 环境变量覆盖
 
-建议优先使用环境变量：
+- OpenAI / OpenAI Responses API：`AI_BASE_URL`、`OPENAI_BASE_URL`、`OPENAI_API_KEY`、`OPENAI_MODEL`
+- Claude：`AI_BASE_URL`、`CLAUDE_BASE_URL`、`CLAUDE_API_KEY`、`CLAUDE_MODEL`
+- Gemini：`AI_BASE_URL`、`GEMINI_BASE_URL`、`GEMINI_API_KEY`、`GEMINI_MODEL`
 
-- `OPENAI_API_KEY`
-- `CLAUDE_API_KEY`
-- `GEMINI_API_KEY`
-
-### 4. 模型
-
-可直接输入任意模型名称，也可通过环境变量覆盖：
-
-- `OPENAI_MODEL`
-- `CLAUDE_MODEL`
-- `GEMINI_MODEL`
+列表中的“测试”操作会使用目标配置发送固定消息 `who are you?`，用于快速验证模型连通性。
 
 ### 5. 调试日志输出
 
@@ -168,26 +157,29 @@ export OPENAI_MODEL="gpt-4o-mini"
 
 ### 配置示例
 
-#### OpenAI
+#### 配置存储结构
 
 ```json
 {
-  "hebai-ai-git-commit.aiProvider": "openai",
-  "hebai-ai-git-commit.baseUrl": "http://localhost:8000/v1",
-  "hebai-ai-git-commit.apiKey": "your-api-key",
-	"hebai-ai-git-commit.model": "gpt-4o-mini",
-	"hebai-ai-git-commit.enableDebugLogs": true
-}
-```
-
-#### OpenAI Responses API
-
-```json
-{
-  "hebai-ai-git-commit.aiProvider": "openai-response",
-  "hebai-ai-git-commit.baseUrl": "https://api.openai.com/v1",
-  "hebai-ai-git-commit.apiKey": "your-api-key",
-	"hebai-ai-git-commit.model": "gpt-4.1-mini",
+  "hebai-ai-git-commit.activeProfileId": "profile-openai-default",
+  "hebai-ai-git-commit.profiles": [
+    {
+    "id": "profile-openai-default",
+    "name": "默认 OpenAI",
+    "provider": "openai",
+    "baseUrl": "http://localhost:8000/v1",
+    "apiKey": "your-openai-key",
+    "model": "gpt-4o-mini"
+    },
+    {
+    "id": "profile-claude-team",
+    "name": "团队 Claude",
+    "provider": "claude",
+    "baseUrl": "https://api.anthropic.com",
+    "apiKey": "your-claude-key",
+    "model": "claude-sonnet-4.5"
+    }
+  ],
 	"hebai-ai-git-commit.enableDebugLogs": true
 }
 ```
@@ -227,9 +219,10 @@ export OPENAI_MODEL="gpt-4o-mini"
 
 ### 网络连接问题
 
-- 检查基础请求地址是否正确。
-- 检查 API Key 是否有效。
-- 检查模型名是否与目标服务兼容。
+- 检查当前激活配置对应的基础请求地址是否正确。
+- 检查当前激活配置对应的 API Key 是否有效。
+- 检查当前激活配置对应的模型名是否与目标服务兼容。
+- 可直接在管理页点击“测试配置”，或运行“测试当前激活配置”，确认当前配置能否返回有效响应。
 
 ---
 
@@ -251,11 +244,13 @@ hebai-ai-git-commit/
 │   └── features/
 │       └── gitCommit/
 │           ├── commands.ts           # 提交信息生成流程
-│           ├── config.ts             # VS Code 配置读取
+│           ├── config.ts             # 当前激活配置读取与 profiles 持久化
 │           ├── diffAnalysis.ts       # Diff 摘要与 scope 分析
 │           ├── prompt.ts             # AI 提示词构建
 │           ├── aiProviders.ts        # OpenAI/Claude/Gemini/openai-response 调用
 │           ├── git.ts                # Git 与 SCM 交互
+│           ├── modelTest.ts          # 模型连通性测试
+│           ├── providerManagementPanel.ts # AI 配置 TreeView 与原生命令流程
 │           ├── constants.ts          # 功能常量
 │           ├── types.ts              # 共享类型
 │           └── cleanCommitMessage.ts # AI 输出清洗与命令解析

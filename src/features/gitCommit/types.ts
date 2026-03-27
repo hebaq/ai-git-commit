@@ -1,6 +1,22 @@
 export type AIProvider = 'openai' | 'openai-response' | 'claude' | 'gemini';
 
+export interface AIProfile {
+	id: string;
+	name: string;
+	provider: AIProvider;
+	apiKey: string;
+	model: string;
+	baseUrl?: string;
+}
+
+export interface ProviderProfilesState {
+	activeProfileId: string;
+	profiles: AIProfile[];
+}
+
 export interface AIConfig {
+	profileId: string;
+	profileName: string;
 	provider: AIProvider;
 	apiKey: string;
 	model: string;

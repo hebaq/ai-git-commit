@@ -1,6 +1,6 @@
 ---
 name: vscode-extension-patterns
-description: VS Code 扩展开发常见模式，重点覆盖 SCM 多仓库上下文路由、Git 仓库选择回退链路，以及 OutputChannel 日志封装的抽象边界。适用于修复多仓库 Git 行为、SCM 按钮命令上下文错误、输出面板日志设计。
+description: VS Code 扩展开发常见模式，重点覆盖 SCM 多仓库上下文路由、Git 仓库选择回退链路、OutputChannel 日志封装边界，以及原生 TreeView 配置管理与 WebviewView 取舍。适用于修复多仓库 Git 行为、SCM 按钮命令上下文错误、输出面板日志设计、侧边栏配置管理实现。
 ---
 
 # VS Code Extension Patterns
@@ -10,6 +10,8 @@ description: VS Code 扩展开发常见模式，重点覆盖 SCM 多仓库上下
 - 修复 SCM 标题栏按钮、命令面板、快捷键在多仓库工作区下行为不一致的问题
 - 需要根据点击来源把命令路由到正确的 Git 仓库，而不是默认工作区根目录
 - 为扩展设计输出面板日志层，并判断是否应该抽到 shared 或 core
+- 需要在侧边栏实现“更像 VS Code 原生面板”的配置管理，而不是自定义网页式界面
+- 需要在 TreeView 中实现配置列表、行内命令、拖拽排序、字段列表式编辑
 
 ## 核心规则
 
@@ -30,3 +32,4 @@ description: VS Code 扩展开发常见模式，重点覆盖 SCM 多仓库上下
 
 - [SCM 多仓库上下文路由](docs/scm-multi-repo-context.md)
 - [OutputChannel 日志抽象边界](docs/output-channel-boundary.md)
+- [TreeView 原生配置管理](docs/treeview-native-management.md)

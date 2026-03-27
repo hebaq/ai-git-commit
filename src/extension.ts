@@ -10,19 +10,23 @@
  */
 
 import * as vscode from 'vscode';
-import { handleGenerateCommitMessage, handleOpenSettings } from './features/gitCommit/commands';
+import { handleGenerateCommitMessage, handleOpenSettings, handleTestModelConnection } from './features/gitCommit/commands';
+import { registerProviderManagementPanel } from './features/gitCommit/providerManagementPanel';
 import {
 	AUTHOR_SIGNATURE,
 	EXTENSION_ID,
 	GENERATE_COMMIT_MESSAGE_COMMAND,
 	GENERATE_PROGRESS_TITLE,
-	OPEN_SETTINGS_COMMAND
+	OPEN_SETTINGS_COMMAND,
+	TEST_MODEL_CONNECTION_COMMAND,
+	TEST_MODEL_PROGRESS_TITLE
 } from './features/gitCommit/constants';
 import { disposeOutputChannel, logDebug, logError, showOutputChannel } from './features/gitCommit/output';
 
 export function activate(context: vscode.ExtensionContext) {
 	logDebug('Hebai AI 智能提交扩展已激活');
 	logDebug(`${AUTHOR_SIGNATURE} - 扩展ID: ${EXTENSION_ID}`);
+	registerProviderManagementPanel(context);
 
 	const generateDisposable = vscode.commands.registerCommand(GENERATE_COMMIT_MESSAGE_COMMAND, async (...commandArgs: unknown[]) => {
 		await vscode.window.withProgress({
@@ -51,7 +55,35 @@ export function activate(context: vscode.ExtensionContext) {
 		handleOpenSettings();
 	});
 
-	context.subscriptions.push(generateDisposable, settingsDisposable, { dispose: disposeOutputChannel });
+	const testModelDisposable = vscode.commands.registerCommand(TEST_MODEL_CONNECTION_COMMAND, async (commandArg?: unknown) => {
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: TEST_MODEL_PROGRESS_TITLE,
+			cancellable: false
+		}, async () => {
+			try {
+				await handleTestModelConnection(commandArg);
+			} catch (error) {
+				logError('测试模型连接时出错:', error);
+				showOutputChannel(true);
+				vscode.window.showErrorMessage(
+					`测试模型连接失败: ${error instanceof Error ? error.message : '未知错误'}`,
+					'打开配置管理',
+					'查看输出'
+				).then(selection => {
+					if (selection === '打开配置管理') {
+						handleOpenSettings();
+					}
+
+					if (selection === '查看输出') {
+						showOutputChannel(true);
+					}
+				});
+			}
+		});
+	});
+
+	context.subscriptions.push(generateDisposable, settingsDisposable, testModelDisposable, { dispose: disposeOutputChannel });
 }
 
 export function deactivate() {

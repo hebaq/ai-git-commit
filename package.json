@@ -39,6 +39,24 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+    {
+      "id": "hebai-ai-git-commit-views",
+      "title": "助手管理",
+      "icon": "resources/activitybar-icon.svg"
+    }
+    ]
+  },
+  "views": {
+    "hebai-ai-git-commit-views": [
+    {
+      "id": "hebai-ai-git-commit-provider-management-view",
+      "name": "助手管理",
+      "icon": "resources/activitybar-icon.svg"
+    }
+    ]
+  },
     "commands": [
       {
         "command": "hebai-ai-git-commit.generateCommitMessage",
@@ -47,48 +65,42 @@
       },
       {
         "command": "hebai-ai-git-commit.openSettings",
-        "title": "打开 Hebai AI Git Commit 设置"
+    "title": "打开助手管理"
+	  },
+	  {
+		"command": "hebai-ai-git-commit.testModelConnection",
+		"title": "测试当前激活配置",
+		"icon": "$(beaker)"
+    },
+    {
+    "command": "hebai-ai-git-commit.addProviderProfile",
+    "title": "新增 AI 配置",
+    "icon": "$(add)"
+    },
+    {
+    "command": "hebai-ai-git-commit.editProviderProfile",
+    "title": "编辑 AI 配置",
+    "icon": "$(edit)"
+    },
+    {
+    "command": "hebai-ai-git-commit.deleteProviderProfile",
+    "title": "删除 AI 配置",
+    "icon": "$(trash)"
+    },
+    {
+    "command": "hebai-ai-git-commit.activateProviderProfile",
+    "title": "设为当前激活配置",
+    "icon": "$(check)"
+    },
+    {
+    "command": "hebai-ai-git-commit.refreshProviderProfiles",
+    "title": "刷新 AI 配置列表",
+    "icon": "$(refresh)"
       }
     ],
     "configuration": {
       "title": "Hebai AI Git Commit",
       "properties": {
-        "hebai-ai-git-commit.aiProvider": {
-          "type": "string",
-          "enum": [
-            "openai",
-            "openai-response",
-            "claude",
-            "gemini"
-          ],
-          "default": "openai",
-          "description": "选择 AI 提供商",
-          "markdownDescription": "选择用于生成提交信息的 AI 服务",
-          "enumDescriptions": [
-            "OpenAI (GPT-3.5/GPT-4)",
-            "OpenAI Responses API (/v1/responses)",
-            "Anthropic Claude",
-            "Google Gemini"
-          ]
-        },
-        "hebai-ai-git-commit.baseUrl": {
-          "type": "string",
-          "default": "",
-          "description": "基础请求地址",
-          "markdownDescription": "用于自定义 API 基础地址。留空则按提供商使用默认地址。可配合环境变量 `AI_BASE_URL`、`OPENAI_BASE_URL`、`CLAUDE_BASE_URL`、`GEMINI_BASE_URL`。"
-        },
-        "hebai-ai-git-commit.apiKey": {
-          "type": "string",
-          "default": "",
-          "description": "AI API 密钥",
-          "markdownDescription": "AI 服务的 API 密钥。建议使用环境变量：`OPENAI_API_KEY`、`CLAUDE_API_KEY`、`GEMINI_API_KEY`。"
-        },
-        "hebai-ai-git-commit.model": {
-          "type": "string",
-          "default": "gpt-3.5-turbo",
-          "description": "AI 模型名称",
-          "markdownDescription": "根据选择的 AI 提供商输入模型名称。可通过环境变量覆盖：`OPENAI_MODEL`、`CLAUDE_MODEL`、`GEMINI_MODEL`。"
-		},
 		"hebai-ai-git-commit.enableDebugLogs": {
 		  "type": "boolean",
 		  "default": false,
@@ -98,6 +110,60 @@
       }
     },
     "menus": {
+    "view/title": [
+    {
+      "command": "hebai-ai-git-commit.addProviderProfile",
+      "when": "view == hebai-ai-git-commit-provider-management-view",
+      "group": "navigation@1"
+    },
+    {
+      "command": "hebai-ai-git-commit.testModelConnection",
+      "when": "view == hebai-ai-git-commit-provider-management-view",
+      "group": "navigation@2"
+    },
+    {
+      "command": "hebai-ai-git-commit.refreshProviderProfiles",
+      "when": "view == hebai-ai-git-commit-provider-management-view",
+      "group": "navigation@3"
+    }
+    ],
+    "view/item/context": [
+    {
+      "command": "hebai-ai-git-commit.editProviderProfile",
+      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
+      "group": "inline@1"
+    },
+    {
+      "command": "hebai-ai-git-commit.activateProviderProfile",
+      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
+      "group": "inline@2"
+    },
+    {
+      "command": "hebai-ai-git-commit.testModelConnection",
+      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
+      "group": "inline@3"
+    },
+    {
+      "command": "hebai-ai-git-commit.deleteProviderProfile",
+      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
+      "group": "inline@4"
+    },
+    {
+      "command": "hebai-ai-git-commit.editProviderProfile",
+      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfileActive",
+      "group": "inline@1"
+    },
+    {
+      "command": "hebai-ai-git-commit.testModelConnection",
+      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfileActive",
+      "group": "inline@2"
+    },
+    {
+      "command": "hebai-ai-git-commit.deleteProviderProfile",
+      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfileActive",
+      "group": "inline@3"
+    }
+    ],
       "scm/title": [
         {
           "command": "hebai-ai-git-commit.generateCommitMessage",
