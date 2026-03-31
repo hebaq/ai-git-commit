@@ -41,129 +41,350 @@
   "contributes": {
     "viewsContainers": {
       "activitybar": [
-    {
-      "id": "hebai-ai-git-commit-views",
-      "title": "助手管理",
-      "icon": "resources/activitybar-icon.svg"
-    }
-    ]
-  },
-  "views": {
-    "hebai-ai-git-commit-views": [
-    {
-      "id": "hebai-ai-git-commit-provider-management-view",
-      "name": "助手管理",
-      "icon": "resources/activitybar-icon.svg"
-    }
-    ]
-  },
+        {
+          "id": "hebai-ai-git-commit-views",
+          "title": "助手管理",
+          "icon": "resources/activitybar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "hebai-ai-git-commit-views": [
+        {
+          "id": "hebai-ai-git-commit-provider-management-view",
+          "name": "助手管理",
+          "icon": "resources/activitybar-icon.svg"
+        },
+        {
+          "id": "hebai-ai-git-commit-deployment-management-view",
+          "name": "部署管理",
+          "icon": "resources/activitybar-icon.svg"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "hebai-ai-git-commit.generateCommitMessage",
-		"title": "生成提交信息",
-		"icon": "$(sparkle)"
+        "title": "生成提交信息",
+        "icon": "$(sparkle)"
       },
       {
         "command": "hebai-ai-git-commit.openSettings",
-    "title": "打开助手管理"
-	  },
-	  {
-		"command": "hebai-ai-git-commit.testModelConnection",
-		"title": "测试当前激活配置",
-		"icon": "$(beaker)"
-    },
-    {
-    "command": "hebai-ai-git-commit.addProviderProfile",
-    "title": "新增 AI 配置",
-    "icon": "$(add)"
-    },
-    {
-    "command": "hebai-ai-git-commit.editProviderProfile",
-    "title": "编辑 AI 配置",
-    "icon": "$(edit)"
-    },
-    {
-    "command": "hebai-ai-git-commit.deleteProviderProfile",
-    "title": "删除 AI 配置",
-    "icon": "$(trash)"
-    },
-    {
-    "command": "hebai-ai-git-commit.activateProviderProfile",
-    "title": "设为当前激活配置",
-    "icon": "$(check)"
-    },
-    {
-    "command": "hebai-ai-git-commit.refreshProviderProfiles",
-    "title": "刷新 AI 配置列表",
-    "icon": "$(refresh)"
+        "title": "打开助手管理"
+      },
+      {
+        "command": "hebai-ai-git-commit.openDeploymentManagement",
+        "title": "打开部署管理"
+      },
+      {
+        "command": "hebai-ai-git-commit.testModelConnection",
+        "title": "测试当前激活配置",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "hebai-ai-git-commit.addProviderProfile",
+        "title": "新增 AI 配置",
+        "icon": "$(add)"
+      },
+      {
+        "command": "hebai-ai-git-commit.editProviderProfile",
+        "title": "编辑 AI 配置",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "hebai-ai-git-commit.deleteProviderProfile",
+        "title": "删除 AI 配置",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "hebai-ai-git-commit.activateProviderProfile",
+        "title": "设为当前激活配置",
+        "icon": "$(check)"
+      },
+      {
+        "command": "hebai-ai-git-commit.refreshProviderProfiles",
+        "title": "刷新 AI 配置列表",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "hebai-ai-git-commit.addDeploymentServer",
+        "title": "新增部署服务器",
+        "icon": "$(add)"
+      },
+      {
+        "command": "hebai-ai-git-commit.addWorkspaceDeploymentTarget",
+        "title": "新增部署目标",
+        "icon": "$(target)"
+      },
+      {
+        "command": "hebai-ai-git-commit.editWorkspaceDeploymentTarget",
+        "title": "编辑部署目标",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "hebai-ai-git-commit.deleteWorkspaceDeploymentTarget",
+        "title": "删除部署目标",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "hebai-ai-git-commit.editDeploymentServer",
+        "title": "编辑部署服务器",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "hebai-ai-git-commit.deleteDeploymentServer",
+        "title": "删除部署服务器",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "hebai-ai-git-commit.testDeploymentServer",
+        "title": "测试部署服务器连接",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "hebai-ai-git-commit.openDeploymentServerTerminal",
+        "title": "打开 SSH 终端",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "hebai-ai-git-commit.uploadDeploymentFiles",
+        "title": "上传文件到服务器",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "hebai-ai-git-commit.uploadExplorerResourcesToDeploymentTarget",
+        "title": "上传到部署目标",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "hebai-ai-git-commit.runDeploymentAction",
+        "title": "执行部署动作",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "hebai-ai-git-commit.runDefaultDeploymentAction",
+        "title": "执行默认部署",
+        "icon": "$(play)"
+      },
+      {
+        "command": "hebai-ai-git-commit.refreshDeploymentServers",
+        "title": "刷新部署服务器列表",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "hebai-ai-git-commit.exportDeploymentServers",
+        "title": "导出部署配置",
+        "icon": "$(export)"
+      },
+      {
+        "command": "hebai-ai-git-commit.importDeploymentServers",
+        "title": "导入部署配置",
+        "icon": "$(cloud-upload)"
       }
     ],
     "configuration": {
       "title": "Hebai AI Git Commit",
       "properties": {
-		"hebai-ai-git-commit.enableDebugLogs": {
-		  "type": "boolean",
-		  "default": false,
-		  "description": "是否在输出面板中输出调试日志",
-		  "markdownDescription": "控制是否将调试日志写入 `Hebai AI Git Commit` 输出面板。最终生成的提交信息和错误日志始终会输出。"
+        "hebai-ai-git-commit.enableDebugLogs": {
+          "type": "boolean",
+          "default": false,
+          "description": "是否在输出面板中输出调试日志",
+          "markdownDescription": "控制是否将调试日志写入 `Hebai AI Git Commit` 输出面板。最终生成的提交信息和错误日志始终会输出。"
+        },
+        "hebai-ai-git-commit.deploymentGlobalServers": {
+          "type": "array",
+          "default": [],
+          "description": "全局部署服务器列表，供所有工作区共享"
+        },
+        "hebai-ai-git-commit.deploymentWorkspaceServers": {
+          "type": "array",
+          "default": [],
+          "description": "当前工作区专属的部署服务器列表"
+        },
+        "hebai-ai-git-commit.deploymentWorkspaceTargets": {
+          "type": "array",
+          "default": [],
+          "description": "当前工作区部署目标列表，每个目标可独立绑定服务器、远程目录、部署动作和默认动作"
         }
       }
     },
     "menus": {
-    "view/title": [
-    {
-      "command": "hebai-ai-git-commit.addProviderProfile",
-      "when": "view == hebai-ai-git-commit-provider-management-view",
-      "group": "navigation@1"
-    },
-    {
-      "command": "hebai-ai-git-commit.testModelConnection",
-      "when": "view == hebai-ai-git-commit-provider-management-view",
-      "group": "navigation@2"
-    },
-    {
-      "command": "hebai-ai-git-commit.refreshProviderProfiles",
-      "when": "view == hebai-ai-git-commit-provider-management-view",
-      "group": "navigation@3"
-    }
-    ],
-    "view/item/context": [
-    {
-      "command": "hebai-ai-git-commit.editProviderProfile",
-      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
-      "group": "inline@1"
-    },
-    {
-      "command": "hebai-ai-git-commit.activateProviderProfile",
-      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
-      "group": "inline@2"
-    },
-    {
-      "command": "hebai-ai-git-commit.testModelConnection",
-      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
-      "group": "inline@3"
-    },
-    {
-      "command": "hebai-ai-git-commit.deleteProviderProfile",
-      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
-      "group": "inline@4"
-    },
-    {
-      "command": "hebai-ai-git-commit.editProviderProfile",
-      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfileActive",
-      "group": "inline@1"
-    },
-    {
-      "command": "hebai-ai-git-commit.testModelConnection",
-      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfileActive",
-      "group": "inline@2"
-    },
-    {
-      "command": "hebai-ai-git-commit.deleteProviderProfile",
-      "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfileActive",
-      "group": "inline@3"
-    }
-    ],
+      "view/title": [
+        {
+          "command": "hebai-ai-git-commit.addProviderProfile",
+          "when": "view == hebai-ai-git-commit-provider-management-view",
+          "group": "navigation@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.testModelConnection",
+          "when": "view == hebai-ai-git-commit-provider-management-view",
+          "group": "navigation@2"
+        },
+        {
+          "command": "hebai-ai-git-commit.refreshProviderProfiles",
+          "when": "view == hebai-ai-git-commit-provider-management-view",
+          "group": "navigation@3"
+        },
+        {
+          "command": "hebai-ai-git-commit.addDeploymentServer",
+          "when": "view == hebai-ai-git-commit-deployment-management-view",
+          "group": "navigation@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.addWorkspaceDeploymentTarget",
+          "when": "view == hebai-ai-git-commit-deployment-management-view",
+          "group": "navigation@2"
+        },
+        {
+          "command": "hebai-ai-git-commit.refreshDeploymentServers",
+          "when": "view == hebai-ai-git-commit-deployment-management-view",
+          "group": "navigation@3"
+        },
+        {
+          "command": "hebai-ai-git-commit.exportDeploymentServers",
+          "when": "view == hebai-ai-git-commit-deployment-management-view",
+          "group": "navigation@4"
+        },
+        {
+          "command": "hebai-ai-git-commit.importDeploymentServers",
+          "when": "view == hebai-ai-git-commit-deployment-management-view",
+          "group": "navigation@5"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "hebai-ai-git-commit.editProviderProfile",
+          "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.activateProviderProfile",
+          "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
+          "group": "inline@2"
+        },
+        {
+          "command": "hebai-ai-git-commit.testModelConnection",
+          "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
+          "group": "inline@3"
+        },
+        {
+          "command": "hebai-ai-git-commit.deleteProviderProfile",
+          "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfile",
+          "group": "inline@4"
+        },
+        {
+          "command": "hebai-ai-git-commit.editProviderProfile",
+          "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfileActive",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.testModelConnection",
+          "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfileActive",
+          "group": "inline@2"
+        },
+        {
+          "command": "hebai-ai-git-commit.deleteProviderProfile",
+          "when": "view == hebai-ai-git-commit-provider-management-view && viewItem == providerProfileActive",
+          "group": "inline@3"
+        },
+        {
+          "command": "hebai-ai-git-commit.addDeploymentServer",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentGlobalRoot",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.addDeploymentServer",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceRoot",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.addWorkspaceDeploymentTarget",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceRoot",
+          "group": "inline@2"
+        },
+        {
+          "command": "hebai-ai-git-commit.runDefaultDeploymentAction",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceTarget",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.runDeploymentAction",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceTarget",
+          "group": "inline@2"
+        },
+        {
+          "command": "hebai-ai-git-commit.editWorkspaceDeploymentTarget",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceTarget",
+          "group": "inline@3"
+        },
+        {
+          "command": "hebai-ai-git-commit.deleteWorkspaceDeploymentTarget",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceTarget",
+          "group": "inline@4"
+        },
+        {
+          "command": "hebai-ai-git-commit.addWorkspaceDeploymentTarget",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceTargetEmpty",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.editDeploymentServer",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentGlobalServer",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.testDeploymentServer",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentGlobalServer",
+          "group": "inline@2"
+        },
+        {
+          "command": "hebai-ai-git-commit.openDeploymentServerTerminal",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentGlobalServer",
+          "group": "inline@3"
+        },
+        {
+          "command": "hebai-ai-git-commit.uploadDeploymentFiles",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentGlobalServer",
+          "group": "inline@4"
+        },
+        {
+          "command": "hebai-ai-git-commit.deleteDeploymentServer",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentGlobalServer",
+          "group": "inline@5"
+        },
+        {
+          "command": "hebai-ai-git-commit.editDeploymentServer",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceServer",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.testDeploymentServer",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceServer",
+          "group": "inline@2"
+        },
+        {
+          "command": "hebai-ai-git-commit.openDeploymentServerTerminal",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceServer",
+          "group": "inline@3"
+        },
+        {
+          "command": "hebai-ai-git-commit.uploadDeploymentFiles",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceServer",
+          "group": "inline@4"
+        },
+        {
+          "command": "hebai-ai-git-commit.deleteDeploymentServer",
+          "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceServer",
+          "group": "inline@5"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "hebai-ai-git-commit.uploadExplorerResourcesToDeploymentTarget",
+          "when": "resourceScheme == file && !explorerResourceIsFolder",
+          "group": "navigation@20"
+        }
+      ],
       "scm/title": [
         {
           "command": "hebai-ai-git-commit.generateCommitMessage",
@@ -197,7 +418,9 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
+    "@types/ssh2": "^1.15.5",
     "axios": "^1.10.0",
-    "openai": "^5.10.2"
+    "openai": "^5.10.2",
+    "ssh2": "^1.17.0"
   }
 }

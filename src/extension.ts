@@ -10,6 +10,7 @@
  */
 
 import * as vscode from 'vscode';
+import { registerDeploymentManagementPanel } from './features/deploy/serverManagementPanel';
 import { handleGenerateCommitMessage, handleOpenSettings, handleTestModelConnection } from './features/gitCommit/commands';
 import { registerProviderManagementPanel } from './features/gitCommit/providerManagementPanel';
 import {
@@ -27,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 	logDebug('Hebai AI 智能提交扩展已激活');
 	logDebug(`${AUTHOR_SIGNATURE} - 扩展ID: ${EXTENSION_ID}`);
 	registerProviderManagementPanel(context);
+	registerDeploymentManagementPanel(context);
 
 	const generateDisposable = vscode.commands.registerCommand(GENERATE_COMMIT_MESSAGE_COMMAND, async (...commandArgs: unknown[]) => {
 		await vscode.window.withProgress({

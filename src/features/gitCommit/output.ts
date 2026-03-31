@@ -76,6 +76,14 @@ export function logGeneratedCommitMessage(message: string): void {
 	channel.appendLine('');
 }
 
+export function appendOutput(value: string): void {
+	getOutputChannel().append(value);
+}
+
+export function appendOutputLine(value: string): void {
+	getOutputChannel().appendLine(value);
+}
+
 export function showOutputChannel(preserveFocus = true): void {
 	getOutputChannel().show(preserveFocus);
 }
