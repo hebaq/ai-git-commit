@@ -12,6 +12,7 @@
 import * as vscode from 'vscode';
 import { registerDeploymentManagementPanel } from './features/deploy/serverManagementPanel';
 import { handleGenerateCommitMessage, handleOpenSettings, handleTestModelConnection } from './features/gitCommit/commands';
+import { registerFileHistoryPanel } from './features/gitCommit/fileHistoryPanel';
 import { registerProviderManagementPanel } from './features/gitCommit/providerManagementPanel';
 import {
 	AUTHOR_SIGNATURE,
@@ -29,6 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 	logDebug(`${AUTHOR_SIGNATURE} - 扩展ID: ${EXTENSION_ID}`);
 	registerProviderManagementPanel(context);
 	registerDeploymentManagementPanel(context);
+	registerFileHistoryPanel(context);
 
 	const generateDisposable = vscode.commands.registerCommand(GENERATE_COMMIT_MESSAGE_COMMAND, async (...commandArgs: unknown[]) => {
 		await vscode.window.withProgress({

@@ -7,6 +7,7 @@ import { promisify } from 'util';
 import { logDebug, logError } from './output';
 
 const exec = promisify(cp.exec);
+const execFile = promisify(cp.execFile);
 
 interface GitRepository {
 	rootUri: vscode.Uri;
@@ -22,6 +23,15 @@ interface GitApi {
 export interface GitRepositoryContext {
 	repository: GitRepository;
 	workspacePath: string;
+}
+
+export interface GitFileHistoryEntry {
+	commitHash: string;
+	shortHash: string;
+	authorName: string;
+	commitDate: string;
+	subject: string;
+	patch: string;
 }
 
 function getGitApi(): GitApi {
@@ -142,6 +152,37 @@ function getRepositoryLabel(repository: GitRepository): string {
 	return path.basename(repository.rootUri.fsPath) || repository.rootUri.fsPath;
 }
 
+function parseFileHistoryLog(output: string): GitFileHistoryEntry[] {
+	return output
+		.split('\x1e')
+		.map(entry => entry.trim())
+		.filter(Boolean)
+		.map(entry => {
+			const newlineIndex = entry.indexOf('\n');
+			const header = newlineIndex >= 0 ? entry.slice(0, newlineIndex) : entry;
+			const patch = newlineIndex >= 0 ? entry.slice(newlineIndex + 1).trimEnd() : '';
+			const [commitHash, shortHash, authorName, commitDate, subject] = header.split('\x1f');
+
+			return {
+				commitHash,
+				shortHash,
+				authorName,
+				commitDate,
+				subject,
+				patch
+			};
+		});
+}
+
+export function getGitRelativePath(workspacePath: string, filePath: string): string {
+	const relativePath = path.relative(workspacePath, filePath);
+	if (!relativePath || relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+		throw new Error('所选文件不在当前 Git 仓库中');
+	}
+
+	return relativePath.split(path.sep).join('/');
+}
+
 async function promptForRepository(repositories: GitRepository[]): Promise<GitRepository> {
 	if (repositories.length === 1) {
 		return repositories[0];
@@ -229,6 +270,27 @@ export async function getDiffForCommitMessage(workspacePath: string): Promise<st
 	}
 
 	throw new Error('检测到工作区有变更，请使用 git add 暂存更改后再生成提交信息');
+}
+
+export async function getFileHistory(workspacePath: string, filePath: string, maxEntries = 100): Promise<GitFileHistoryEntry[]> {
+	const gitRelativePath = getGitRelativePath(workspacePath, filePath);
+	logDebug(`开始读取文件历史: ${gitRelativePath}`);
+
+	const { stdout } = await execFile('git', [
+		'log',
+		'--follow',
+		`--max-count=${maxEntries}`,
+		'--date=short',
+		'--format=%x1e%H%x1f%h%x1f%an%x1f%ad%x1f%s',
+		'-p',
+		'--',
+		gitRelativePath
+	], {
+		cwd: workspacePath,
+		maxBuffer: 50 * 1024 * 1024
+	});
+
+	return parseFileHistoryLog(stdout);
 }
 
 export async function setCommitMessage(message: string, repository: GitRepository): Promise<void> {

@@ -69,6 +69,11 @@
         "icon": "$(sparkle)"
       },
       {
+        "command": "hebai-ai-git-commit.openFileHistory",
+        "title": "查看文件历史",
+        "icon": "$(history)"
+      },
+      {
         "command": "hebai-ai-git-commit.openSettings",
         "title": "打开助手管理"
       },
@@ -379,6 +384,11 @@
         }
       ],
       "explorer/context": [
+        {
+          "command": "hebai-ai-git-commit.openFileHistory",
+          "when": "resourceScheme == file && !explorerResourceIsFolder",
+          "group": "navigation@19"
+        },
         {
           "command": "hebai-ai-git-commit.uploadExplorerResourcesToDeploymentTarget",
           "when": "resourceScheme == file && !explorerResourceIsFolder",

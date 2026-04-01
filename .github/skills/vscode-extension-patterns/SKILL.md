@@ -12,6 +12,8 @@ description: VS Code 扩展开发常见模式，重点覆盖 SCM 多仓库上下
 - 为扩展设计输出面板日志层，并判断是否应该抽到 shared 或 core
 - 需要在侧边栏实现“更像 VS Code 原生面板”的配置管理，而不是自定义网页式界面
 - 需要在 TreeView 中实现配置列表、行内命令、拖拽排序、字段列表式编辑
+- 需要实现基于 WebviewPanel 的 Git 文件历史 / diff 查看界面
+- 需要把 Git 历史变更发送到 Copilot Chat 上下文，同时区分公开 Chat API 与 Copilot CLI 私有命令
 
 ## 核心规则
 
@@ -33,3 +35,4 @@ description: VS Code 扩展开发常见模式，重点覆盖 SCM 多仓库上下
 - [SCM 多仓库上下文路由](docs/scm-multi-repo-context.md)
 - [OutputChannel 日志抽象边界](docs/output-channel-boundary.md)
 - [TreeView 原生配置管理](docs/treeview-native-management.md)
+- [Webview 历史与 Chat 集成](docs/webview-history-chat-integration.md)

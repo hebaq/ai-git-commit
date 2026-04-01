@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src {{cspSource}}; script-src {{cspSource}};" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>文件历史</title>
+	<link rel="stylesheet" href="{{stylesheetUri}}" />
+</head>
+<body data-state="{{state}}">
+	<div class="app-shell">
+		<header class="header">
+			<div class="header__title">
+				<h1 id="fileName"></h1>
+				<p id="filePath"></p>
+			</div>
+			<p class="header__meta" id="entrySummary"></p>
+		</header>
+		<div class="layout">
+			<aside class="history-list" id="historyList"></aside>
+			<section class="diff-panel">
+				<div class="diff-header">
+					<div class="diff-header__top">
+						<h2 id="commitSubject"></h2>
+						<div class="diff-header__actions">
+							<button type="button" class="secondary-action-button" id="addToChatButton">发送到 Copilot Chat</button>
+							<button type="button" class="secondary-action-button" id="copyCommitButton">复制提交 ID</button>
+						</div>
+					</div>
+					<p id="commitMeta"></p>
+				</div>
+				<div class="diff-content" id="diffContent"></div>
+			</section>
+		</div>
+	</div>
+	<script src="{{scriptUri}}"></script>
+</body>
+</html>
