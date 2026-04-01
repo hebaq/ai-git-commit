@@ -1,14 +1,17 @@
 import * as vscode from 'vscode';
 
 import {
+	ACTIVE_PROVIDER_PROFILE_ID_SETTING,
 	ACTIVE_PROVIDER_PROFILE_ITEM_CONTEXT,
 	ACTIVATE_PROVIDER_PROFILE_COMMAND,
 	ADD_PROVIDER_PROFILE_COMMAND,
+	CONFIG_NAMESPACE,
 	DELETE_PROVIDER_PROFILE_COMMAND,
 	EDIT_PROVIDER_PROFILE_COMMAND,
 	PROVIDER_MANAGEMENT_PANEL_TITLE,
 	PROVIDER_MANAGEMENT_VIEW_CONTAINER_ID,
 	PROVIDER_MANAGEMENT_VIEW_ID,
+	PROVIDER_PROFILES_SETTING,
 	PROVIDER_PROFILE_ITEM_CONTEXT,
 	REFRESH_PROVIDER_PROFILES_COMMAND
 } from './constants';
@@ -25,6 +28,8 @@ import type { AIProfile, AIProvider, ProviderProfilesState } from './types';
 
 const PROVIDER_GROUP_ROOT_ID = 'ai-provider-group-root';
 const PROVIDER_PROFILE_TREE_MIME = 'application/vnd.hebai-ai-git-commit.provider-profiles';
+const PROVIDER_PROFILES_CONFIGURATION_KEY = `${CONFIG_NAMESPACE}.${PROVIDER_PROFILES_SETTING}`;
+const ACTIVE_PROVIDER_PROFILE_ID_CONFIGURATION_KEY = `${CONFIG_NAMESPACE}.${ACTIVE_PROVIDER_PROFILE_ID_SETTING}`;
 
 let providerManagementDataProvider: ProviderManagementTreeDataProvider | undefined;
 let providerManagementTreeView: vscode.TreeView<ProviderManagementTreeItem> | undefined;
@@ -554,6 +559,14 @@ export function registerProviderManagementPanel(context: vscode.ExtensionContext
 	updateProviderManagementViewMetadata();
 
 	context.subscriptions.push(providerManagementTreeView);
+	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
+		if (!event.affectsConfiguration(PROVIDER_PROFILES_CONFIGURATION_KEY)
+			&& !event.affectsConfiguration(ACTIVE_PROVIDER_PROFILE_ID_CONFIGURATION_KEY)) {
+			return;
+		}
+
+		providerManagementDataProvider?.refresh();
+	}));
 	context.subscriptions.push(vscode.commands.registerCommand(ADD_PROVIDER_PROFILE_COMMAND, async () => {
 		try {
 			await handleAddProfile();

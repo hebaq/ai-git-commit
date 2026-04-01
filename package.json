@@ -196,6 +196,54 @@
           "description": "是否在输出面板中输出调试日志",
           "markdownDescription": "控制是否将调试日志写入 `Hebai AI Git Commit` 输出面板。最终生成的提交信息和错误日志始终会输出。"
         },
+        "hebai-ai-git-commit.profiles": {
+          "type": "array",
+          "scope": "window",
+          "default": [],
+          "description": "AI 提供商配置列表，包含名称、供应商、模型与连接信息",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "配置唯一标识"
+              },
+              "name": {
+                "type": "string",
+                "description": "配置名称"
+              },
+              "provider": {
+                "type": "string",
+                "enum": [
+                  "openai",
+                  "openai-response",
+                  "claude",
+                  "gemini"
+                ],
+                "description": "AI 提供商"
+              },
+              "apiKey": {
+                "type": "string",
+                "description": "AI 提供商 API Key"
+              },
+              "model": {
+                "type": "string",
+                "description": "模型名称"
+              },
+              "baseUrl": {
+                "type": "string",
+                "description": "可选的自定义 API Base URL"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "hebai-ai-git-commit.activeProfileId": {
+          "type": "string",
+          "scope": "window",
+          "default": "",
+          "description": "当前激活的 AI 配置 ID"
+        },
         "hebai-ai-git-commit.deploymentGlobalServers": {
           "type": "array",
           "default": [],
