@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import { getDeploymentServerPrivateKey } from './secretStorage';
+import { getDeploymentServerPassword, getDeploymentServerPrivateKey } from './secretStorage';
 import type { DeploymentServerProfile } from './types';
 
 const trackedTerminalKeyFiles = new Map<vscode.Terminal, string>();
@@ -61,7 +61,13 @@ export async function openDeploymentServerTerminal(server: DeploymentServerProfi
 			informationalMessage = '未找到已保存的私钥，终端已打开；如果本机未配置对应私钥，SSH 登录可能失败。';
 		}
 	} else if (server.authType === 'password') {
-		informationalMessage = '终端已打开，请在终端中手动输入 SSH 密码。';
+		const password = await getDeploymentServerPassword(server.id);
+		if (password) {
+			await vscode.env.clipboard.writeText(password);
+			informationalMessage = '已将已保存的 SSH 密码写入剪贴板，请在终端提示时直接粘贴。';
+		} else {
+			informationalMessage = '未找到已保存的 SSH 密码，终端已打开；请手动输入密码。';
+		}
 	}
 
 	sshArgs.push(`${server.username}@${server.host}`);

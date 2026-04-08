@@ -439,7 +439,7 @@
         },
         {
           "command": "hebai-ai-git-commit.uploadExplorerResourcesToDeploymentTarget",
-          "when": "resourceScheme == file && !explorerResourceIsFolder",
+          "when": "resourceScheme == file",
           "group": "navigation@20"
         }
       ],

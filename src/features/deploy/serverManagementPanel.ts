@@ -1,3 +1,4 @@
+import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { appendOutputLine, logError, showOutputChannel } from '../gitCommit/output';
@@ -54,7 +55,8 @@ import {
 	saveDeploymentPrivateKeyDraft,
 	saveDeploymentSecretEnvDrafts
 } from './secretStorage';
-import { runDeploymentAction, testDeploymentConnection, uploadFilesToDeploymentServer } from './ssh';
+import { listDeploymentServerDirectory, runDeploymentAction, testDeploymentConnection, uploadFilesToDeploymentServer } from './ssh';
+import type { DeploymentRemoteEntry, DeploymentUploadMode } from './ssh';
 import { openDeploymentServerTerminal, registerDeploymentTerminalCleanup } from './terminal';
 import type {
 	DeploymentAction,
@@ -72,11 +74,12 @@ const DEPLOYMENT_GROUP_ROOT_IDS: Record<DeploymentScope, string> = {
 	global: 'deployment-global-root',
 	workspace: 'deployment-workspace-root'
 };
+const DEPLOYMENT_REMOTE_BROWSE_ROOT = '/';
 
 let deploymentManagementDataProvider: DeploymentManagementTreeDataProvider | undefined;
 let deploymentManagementTreeView: vscode.TreeView<DeploymentManagementTreeItem> | undefined;
 
-type DeploymentManagementTreeItem = DeploymentGroupRootTreeItem | DeploymentWorkspaceTargetTreeItem | DeploymentWorkspaceTargetEmptyTreeItem | DeploymentServerGroupTreeItem | DeploymentServerTreeItem;
+type DeploymentManagementTreeItem = DeploymentGroupRootTreeItem | DeploymentWorkspaceTargetTreeItem | DeploymentWorkspaceTargetEmptyTreeItem | DeploymentServerGroupTreeItem | DeploymentServerTreeItem | DeploymentRemoteEntryTreeItem | DeploymentRemotePlaceholderTreeItem;
 type ActionEditorResult = DeploymentAction | 'delete' | undefined;
 type SecretEditorResult = DeploymentSecretEnvDraft | 'delete' | undefined;
 type ServerEditorAction = 'cancel' | 'name' | 'groupPath' | 'note' | 'host' | 'port' | 'username' | 'authType' | 'password' | 'privateKey' | 'secrets' | 'test' | 'save';
@@ -120,7 +123,7 @@ class DeploymentGroupRootTreeItem extends vscode.TreeItem {
 
 class DeploymentServerTreeItem extends vscode.TreeItem {
 	constructor(public readonly server: ScopedDeploymentServer) {
-		super(server.name, vscode.TreeItemCollapsibleState.None);
+		super(server.name, vscode.TreeItemCollapsibleState.Collapsed);
 		this.id = server.id;
 		this.description = `${server.username}@${server.host}:${server.port}`;
 		this.tooltip = new vscode.MarkdownString([
@@ -130,6 +133,7 @@ class DeploymentServerTreeItem extends vscode.TreeItem {
 			`- 备注: ${server.note || '无'}`,
 			`- SSH: ${server.username}@${server.host}:${server.port}`,
 			`- 认证方式: ${getAuthTypeLabel(server.authType)}`,
+			`- 浏览根目录: ${getDeploymentRemoteBrowseRoot(server)}`,
 			'- 说明: 部署动作和远程目录已迁到“工作区部署目标”中维护',
 			`- 敏感环境变量: ${server.secretEnvKeys.length} 个`
 		].join('\n'));
@@ -137,6 +141,41 @@ class DeploymentServerTreeItem extends vscode.TreeItem {
 			? DEPLOYMENT_GLOBAL_SERVER_ITEM_CONTEXT
 			: DEPLOYMENT_WORKSPACE_SERVER_ITEM_CONTEXT;
 		this.iconPath = new vscode.ThemeIcon(server.scope === 'global' ? 'server-environment' : 'server-process');
+	}
+}
+
+class DeploymentRemoteEntryTreeItem extends vscode.TreeItem {
+	constructor(
+		public readonly server: ScopedDeploymentServer,
+		public readonly entry: DeploymentRemoteEntry
+	) {
+		super(entry.name, entry.isDirectory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
+		this.id = `deployment-remote-${server.id}-${entry.remotePath}`;
+		this.description = entry.isDirectory ? undefined : formatRemoteFileSize(entry.size);
+		this.tooltip = new vscode.MarkdownString([
+			`**${entry.name}**`,
+			`- 服务器: ${server.name}`,
+			`- 路径: ${entry.remotePath}`,
+			`- 类型: ${entry.isDirectory ? '目录' : '文件'}`,
+			...(!entry.isDirectory ? [`- 大小: ${formatRemoteFileSize(entry.size)}`] : [])
+		].join('\n'));
+		this.iconPath = new vscode.ThemeIcon(entry.isDirectory ? 'folder' : 'file');
+		this.contextValue = 'deploymentRemoteEntry';
+	}
+}
+
+class DeploymentRemotePlaceholderTreeItem extends vscode.TreeItem {
+	constructor(
+		public readonly server: ScopedDeploymentServer,
+		public readonly remoteDirectory: string,
+		label: string,
+		tooltip?: string
+	) {
+		super(label, vscode.TreeItemCollapsibleState.None);
+		this.id = `deployment-remote-placeholder-${server.id}-${remoteDirectory}-${label}`;
+		this.iconPath = new vscode.ThemeIcon('circle-large-outline');
+		this.tooltip = tooltip || label;
+		this.contextValue = 'deploymentRemotePlaceholder';
 	}
 }
 
@@ -149,7 +188,7 @@ class DeploymentServerGroupTreeItem extends vscode.TreeItem {
 		this.iconPath = new vscode.ThemeIcon('folder');
 		this.contextValue = DEPLOYMENT_SERVER_GROUP_CONTEXT;
 	}
-	}
+}
 
 class DeploymentWorkspaceTargetTreeItem extends vscode.TreeItem {
 	constructor(public readonly target: DeploymentWorkspaceTarget) {
@@ -213,7 +252,7 @@ class DeploymentManagementTreeDataProvider implements vscode.TreeDataProvider<De
 		return element;
 	}
 
-	getChildren(element?: DeploymentManagementTreeItem): DeploymentManagementTreeItem[] {
+	async getChildren(element?: DeploymentManagementTreeItem): Promise<DeploymentManagementTreeItem[]> {
 		const groups = getDeploymentServerGroups();
 
 		if (!element) {
@@ -228,6 +267,14 @@ class DeploymentManagementTreeDataProvider implements vscode.TreeDataProvider<De
 
 		if (element instanceof DeploymentServerGroupTreeItem) {
 			return getDeploymentTreeChildren(element.scope, element.groupPath);
+		}
+
+		if (element instanceof DeploymentServerTreeItem) {
+			return getRemoteDirectoryTreeChildren(element.server, getDeploymentRemoteBrowseRoot(element.server));
+		}
+
+		if (element instanceof DeploymentRemoteEntryTreeItem && element.entry.isDirectory) {
+			return getRemoteDirectoryTreeChildren(element.server, element.entry.remotePath);
 		}
 
 		return [];
@@ -248,6 +295,33 @@ class DeploymentManagementTreeDataProvider implements vscode.TreeDataProvider<De
 			return new DeploymentGroupRootTreeItem(element.server.scope, group?.servers.length || 0);
 		}
 
+		if (element instanceof DeploymentRemoteEntryTreeItem) {
+			const parentPath = path.posix.dirname(element.entry.remotePath);
+			if (parentPath === DEPLOYMENT_REMOTE_BROWSE_ROOT) {
+				return this.getItemById(element.server.id) || null;
+			}
+
+			return new DeploymentRemoteEntryTreeItem(element.server, {
+				name: path.posix.basename(parentPath),
+				remotePath: parentPath,
+				isDirectory: true,
+				size: 0
+			});
+		}
+
+		if (element instanceof DeploymentRemotePlaceholderTreeItem) {
+			if (element.remoteDirectory === DEPLOYMENT_REMOTE_BROWSE_ROOT) {
+				return this.getItemById(element.server.id) || null;
+			}
+
+			return new DeploymentRemoteEntryTreeItem(element.server, {
+				name: path.posix.basename(element.remoteDirectory),
+				remotePath: element.remoteDirectory,
+				isDirectory: true,
+				size: 0
+			});
+		}
+
 		if (element instanceof DeploymentServerGroupTreeItem) {
 			const parentGroupPath = getParentGroupPath(element.groupPath);
 			if (parentGroupPath) {
@@ -264,6 +338,40 @@ class DeploymentManagementTreeDataProvider implements vscode.TreeDataProvider<De
 	getItemById(serverId: string): DeploymentServerTreeItem | undefined {
 		const server = getDeploymentServerById(serverId);
 		return server ? createDeploymentServerTreeItem(server) : undefined;
+	}
+}
+
+function formatRemoteFileSize(size: number): string {
+	if (size < 1024) {
+		return `${size} B`;
+	}
+
+	if (size < 1024 * 1024) {
+		return `${(size / 1024).toFixed(1)} KB`;
+	}
+
+	if (size < 1024 * 1024 * 1024) {
+		return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+	}
+
+	return `${(size / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+}
+
+async function getRemoteDirectoryTreeChildren(server: ScopedDeploymentServer, remoteDirectory: string): Promise<DeploymentManagementTreeItem[]> {
+	try {
+		const entries = await listDeploymentServerDirectory(server, remoteDirectory);
+		if (entries.length === 0) {
+			return [new DeploymentRemotePlaceholderTreeItem(server, remoteDirectory, '空目录')];
+		}
+
+		return entries.map(entry => new DeploymentRemoteEntryTreeItem(server, entry));
+	} catch (error) {
+		return [new DeploymentRemotePlaceholderTreeItem(
+			server,
+			remoteDirectory,
+			'无法读取目录',
+			error instanceof Error ? error.message : '读取远端目录失败'
+		)];
 	}
 }
 
@@ -466,6 +574,11 @@ function joinRemoteDirectory(baseDirectory: string, childPath: string): string {
 		.join('/');
 
 	return normalizedChild ? `${normalizedBase}/${normalizedChild}` : normalizedBase;
+}
+
+function getDeploymentRemoteBrowseRoot(server: ScopedDeploymentServer): string {
+	const remoteRoot = server.remoteRoot?.trim();
+	return remoteRoot ? remoteRoot : DEPLOYMENT_REMOTE_BROWSE_ROOT;
 }
 
 async function promptForTargetUploadDirectory(targetName: string, baseDirectory: string): Promise<string | undefined> {
@@ -1686,13 +1799,18 @@ async function handleUploadFiles(itemOrServerId?: DeploymentServerTreeItem | str
 		return;
 	}
 
-	const fileUris = await vscode.window.showOpenDialog({
+	const resourceUris = await vscode.window.showOpenDialog({
 		canSelectFiles: true,
-		canSelectFolders: false,
+		canSelectFolders: true,
 		canSelectMany: true,
-		openLabel: '选择要上传的文件'
+		openLabel: '选择要上传的文件或目录'
 	});
-	if (!fileUris || fileUris.length === 0) {
+	if (!resourceUris || resourceUris.length === 0) {
+		return;
+	}
+
+	const uploadMode = await promptForUploadMode(resourceUris);
+	if (!uploadMode) {
 		return;
 	}
 
@@ -1701,15 +1819,16 @@ async function handleUploadFiles(itemOrServerId?: DeploymentServerTreeItem | str
 		return;
 	}
 
-	appendOutputLine(`\n=== 上传文件到服务器：${server.name} ===`);
-	await uploadFilesToDeploymentServer(server, fileUris.map(uri => uri.fsPath), remoteDirectory.trim());
+	appendOutputLine(`\n=== 上传文件/目录到服务器：${server.name} ===`);
+	await uploadFilesToDeploymentServer(server, resourceUris.map(uri => uri.fsPath), remoteDirectory.trim(), { mode: uploadMode });
 	showOutputChannel(true);
-	vscode.window.showInformationMessage(`文件上传成功：${server.name} -> ${remoteDirectory.trim()}`, '查看输出').then(selection => {
+	deploymentManagementDataProvider?.refresh();
+	vscode.window.showInformationMessage(`文件/目录上传成功：${server.name} -> ${remoteDirectory.trim()}`, '查看输出').then(selection => {
 		if (selection === '查看输出') {
 			showOutputChannel(true);
 		}
 	});
-	}
+}
 
 async function normalizeExplorerResourceUris(resource?: vscode.Uri, resources?: readonly vscode.Uri[]): Promise<vscode.Uri[]> {
 	const candidates = resources && resources.length > 0 ? [...resources] : resource ? [resource] : [];
@@ -1724,14 +1843,54 @@ async function normalizeExplorerResourceUris(resource?: vscode.Uri, resources?: 
 	})));
 
 	return stats
-		.filter(entry => (entry.stat.type & vscode.FileType.File) !== 0)
+		.filter(entry => (entry.stat.type & (vscode.FileType.File | vscode.FileType.Directory)) !== 0)
 		.map(entry => entry.uri);
 	}
 
+function describeUploadedExplorerResources(resourceUris: vscode.Uri[]): string {
+	if (resourceUris.length === 1) {
+		return resourceUris[0].path.split('/').pop() || '资源';
+	}
+
+	return `${resourceUris.length} 个项目`;
+}
+
+async function promptForUploadMode(resourceUris: vscode.Uri[]): Promise<DeploymentUploadMode | undefined> {
+	const stats = await Promise.all(resourceUris.map(uri => vscode.workspace.fs.stat(uri)));
+	const hasDirectory = stats.some(stat => (stat.type & vscode.FileType.Directory) !== 0);
+	if (!hasDirectory) {
+		return 'standard';
+	}
+
+	const selected = await vscode.window.showQuickPick([
+		{
+			label: '普通上传',
+			description: '递归上传目录，适合中小规模文件',
+			mode: 'standard' as const,
+			picked: true
+		},
+		{
+			label: '打包上传并解压',
+			description: '适合 dist 等大量小文件目录，通常更快',
+			mode: 'archive' as const
+		},
+		{
+			label: '备份后替换上传',
+			description: '先备份当前远端目录，再清空目标目录并打包上传',
+			mode: 'backupReplace' as const
+		}
+	], {
+		ignoreFocusOut: true,
+		placeHolder: '选择上传方式'
+	});
+
+	return selected?.mode;
+}
+
 async function handleUploadExplorerResources(resource?: vscode.Uri, resources?: readonly vscode.Uri[]): Promise<void> {
-	const fileUris = await normalizeExplorerResourceUris(resource, resources);
-	if (fileUris.length === 0) {
-		vscode.window.showInformationMessage('请在资源管理器中选择至少一个文件进行上传');
+	const resourceUris = await normalizeExplorerResourceUris(resource, resources);
+	if (resourceUris.length === 0) {
+		vscode.window.showInformationMessage('请在资源管理器中选择至少一个文件或目录进行上传');
 		return;
 	}
 
@@ -1746,22 +1905,28 @@ async function handleUploadExplorerResources(resource?: vscode.Uri, resources?: 
 		return;
 	}
 
+	const uploadMode = await promptForUploadMode(resourceUris);
+	if (!uploadMode) {
+		return;
+	}
+
 	const remoteDirectory = await promptForTargetUploadDirectory(target.name, target.remoteRoot || '');
 	if (!remoteDirectory || remoteDirectory === undefined) {
 		return;
 	}
 
-	appendOutputLine(`\n=== 从资源管理器上传文件：${target.name} / ${resolvedTarget.server.name} ===`);
+	appendOutputLine(`\n=== 从资源管理器上传文件/目录：${target.name} / ${resolvedTarget.server.name} ===`);
 	const runtimeServer = buildWorkspaceDeploymentRuntimeServer(resolvedTarget);
-	await uploadFilesToDeploymentServer(runtimeServer, fileUris.map(uri => uri.fsPath), remoteDirectory.trim());
+	await uploadFilesToDeploymentServer(runtimeServer, resourceUris.map(uri => uri.fsPath), remoteDirectory.trim(), { mode: uploadMode });
 	showOutputChannel(true);
-	const uploadedNames = fileUris.length === 1 ? fileUris[0].path.split('/').pop() || '文件' : `${fileUris.length} 个文件`;
+	deploymentManagementDataProvider?.refresh();
+	const uploadedNames = describeUploadedExplorerResources(resourceUris);
 	vscode.window.showInformationMessage(`上传成功：${uploadedNames} -> ${target.name}`, '查看输出').then(selection => {
 		if (selection === '查看输出') {
 			showOutputChannel(true);
 		}
 	});
-	}
+}
 
 async function handleAddWorkspaceDeploymentTarget(itemOrServerId?: DeploymentServerTreeItem | string): Promise<void> {
 	const serverId = typeof itemOrServerId === 'string' ? itemOrServerId : resolveServerIdFromCommandArg(itemOrServerId);
