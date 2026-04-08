@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { generateAICommitMessage } from './aiProviders';
 import { getAIConfig, getProviderProfileById, resolveAIConfigFromProfile } from './config';
-import { ensureGitRepository, getDiffForCommitMessage, resolveGitRepository, setCommitMessage } from './git';
+import { ensureGitRepository, getDiffForCommitMessage, getRecentCommits, resolveGitRepository, setCommitMessage } from './git';
 import { testAIConfigConnection } from './modelTest';
 import { logDebug, logError, logGeneratedCommitMessage, logInfo, showOutputChannel } from './output';
 import { openProviderManagementPanel } from './providerManagementPanel';
@@ -23,7 +23,7 @@ function resolveProfileIdFromCommandArg(commandArg?: unknown): string | undefine
 	return undefined;
 }
 
-async function analyzeChangesAndGenerateMessage(diffOutput: string, config: AIConfig): Promise<string> {
+async function analyzeChangesAndGenerateMessage(diffOutput: string, workspacePath: string, config: AIConfig): Promise<string> {
 	logDebug('开始分析变更并生成消息...');
 
 	if (!config.apiKey) {
@@ -32,7 +32,8 @@ async function analyzeChangesAndGenerateMessage(diffOutput: string, config: AICo
 
 	try {
 		logDebug('尝试使用 AI 生成提交信息...');
-		return await generateAICommitMessage(diffOutput, config);
+		const recentCommits = await getRecentCommits(workspacePath, 10);
+		return await generateAICommitMessage(diffOutput, recentCommits, config);
 	} catch (error) {
 		logError('AI 生成失败:', error);
 		throw new Error(`AI 生成失败: ${error instanceof Error ? error.message : '未知错误'}`);
@@ -49,7 +50,7 @@ export async function handleGenerateCommitMessage(commandContext?: unknown): Pro
 
 	const diffOutput = await getDiffForCommitMessage(workspacePath);
 	const config = getAIConfig();
-	const commitMessage = await analyzeChangesAndGenerateMessage(diffOutput, config);
+	const commitMessage = await analyzeChangesAndGenerateMessage(diffOutput, workspacePath, config);
 
 	await setCommitMessage(commitMessage, repository);
 	logGeneratedCommitMessage(commitMessage);

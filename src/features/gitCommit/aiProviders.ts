@@ -6,6 +6,7 @@ import { AI_RESPONSE_MAX_TOKENS, AI_RESPONSE_TEMPERATURE } from './constants';
 import { logDebug } from './output';
 import { buildPrompt } from './prompt';
 import type { AIConfig } from './types';
+import type { GitCommitEntry } from './git';
 
 function normalizeBaseUrl(baseUrl: string): string {
 	return baseUrl.replace(/\/$/, '');
@@ -138,8 +139,8 @@ export async function generateAIText(prompt: string, config: AIConfig): Promise<
 	}
 }
 
-export async function generateAICommitMessage(diffOutput: string, config: AIConfig): Promise<string> {
-	const prompt = buildPrompt(diffOutput, config);
+export async function generateAICommitMessage(diffOutput: string, recentCommits: GitCommitEntry[], config: AIConfig): Promise<string> {
+	const prompt = buildPrompt(diffOutput, recentCommits, config);
 	const rawMessage = await generateAIText(prompt, config);
 	return cleanCommitMessage(rawMessage);
 }

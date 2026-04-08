@@ -18,6 +18,7 @@ export const AUTHOR_SIGNATURE = 'Hebai © 2026';
 export const GENERATE_PROGRESS_TITLE = '正在生成提交信息...';
 export const FILE_HISTORY_PROGRESS_TITLE = '正在读取文件历史...';
 export const TEST_MODEL_PROGRESS_TITLE = '正在测试模型连接...';
+export const SHOW_REMOTE_REPOSITORY_COMMAND = `${CONFIG_NAMESPACE}.showRemoteRepository`;
 export const AI_RESPONSE_MAX_TOKENS = 400;
 export const AI_RESPONSE_TEMPERATURE = 0.1;
 export const TEST_MODEL_PROMPT = 'who are you?';
@@ -28,3 +29,18 @@ export const PROVIDER_MANAGEMENT_VIEW_CONTAINER_ID = 'hebai-ai-git-commit-views'
 export const PROVIDER_MANAGEMENT_VIEW_ID = 'hebai-ai-git-commit-provider-management-view';
 export const PROVIDER_PROFILE_ITEM_CONTEXT = 'providerProfile';
 export const ACTIVE_PROVIDER_PROFILE_ITEM_CONTEXT = 'providerProfileActive';
+
+// Remote Repository Management Constants
+export const REMOTE_REPOSITORY_MANAGEMENT_PANEL_TITLE = '远程仓库管理';
+export const REMOTE_REPOSITORY_MANAGEMENT_VIEW_ID = 'hebai-ai-git-commit-remote-repository-management-view';
+export const OPEN_REMOTE_REPOSITORY_MANAGEMENT_COMMAND = `${CONFIG_NAMESPACE}.openRemoteRepositoryManagement`;
+export const ADD_REMOTE_REPOSITORY_COMMAND = `${CONFIG_NAMESPACE}.addRemoteRepository`;
+export const EDIT_REMOTE_REPOSITORY_COMMAND = `${CONFIG_NAMESPACE}.editRemoteRepository`;
+export const DELETE_REMOTE_REPOSITORY_COMMAND = `${CONFIG_NAMESPACE}.deleteRemoteRepository`;
+export const FETCH_REMOTE_REPOSITORY_COMMAND = `${CONFIG_NAMESPACE}.fetchRemoteRepository`;
+export const PUSH_TO_REMOTE_REPOSITORY_COMMAND = `${CONFIG_NAMESPACE}.pushToRemoteRepository`;
+export const REFRESH_REMOTE_REPOSITORIES_COMMAND = `${CONFIG_NAMESPACE}.refreshRemoteRepositories`;
+export const COPY_REMOTE_REPOSITORY_URL_COMMAND = `${CONFIG_NAMESPACE}.copyRemoteRepositoryUrl`;
+export const REMOTE_REPOSITORY_ITEM_CONTEXT = 'remoteRepository';
+export const REMOTE_REPOSITORY_ROOT_ITEM_CONTEXT = 'remoteRepositoryRoot';
+export const REMOTE_REPOSITORY_EMPTY_ITEM_CONTEXT = 'remoteRepositoryEmpty';

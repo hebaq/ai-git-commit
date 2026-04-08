@@ -14,6 +14,7 @@ import { registerDeploymentManagementPanel } from './features/deploy/serverManag
 import { handleGenerateCommitMessage, handleOpenSettings, handleTestModelConnection } from './features/gitCommit/commands';
 import { registerFileHistoryPanel } from './features/gitCommit/fileHistoryPanel';
 import { registerProviderManagementPanel } from './features/gitCommit/providerManagementPanel';
+import { registerScmRemoteRepositoryView } from './features/gitCommit/scmRemoteView';
 import {
 	AUTHOR_SIGNATURE,
 	EXTENSION_ID,
@@ -31,6 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 	registerProviderManagementPanel(context);
 	registerDeploymentManagementPanel(context);
 	registerFileHistoryPanel(context);
+	registerScmRemoteRepositoryView(context);
 
 	const generateDisposable = vscode.commands.registerCommand(GENERATE_COMMIT_MESSAGE_COMMAND, async (...commandArgs: unknown[]) => {
 		await vscode.window.withProgress({

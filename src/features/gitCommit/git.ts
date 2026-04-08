@@ -25,6 +25,13 @@ export interface GitRepositoryContext {
 	workspacePath: string;
 }
 
+export interface GitRepositorySummary {
+	rootUri: vscode.Uri;
+	workspacePath: string;
+	label: string;
+	description: string;
+}
+
 export interface GitFileHistoryEntry {
 	commitHash: string;
 	shortHash: string;
@@ -34,14 +41,55 @@ export interface GitFileHistoryEntry {
 	patch: string;
 }
 
-function getGitApi(): GitApi {
-	const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
+export interface GitCommitEntry {
+	commitHash: string;
+	shortHash: string;
+	authorName: string;
+	commitDate: string;
+	subject: string;
+}
+
+export interface GitRemoteEntry {
+	name: string;
+	fetchUrl: string;
+	pushUrl: string;
+}
+
+function resolveGitApiFromExtension(extension: vscode.Extension<unknown> | undefined): GitApi | undefined {
+	if (!extension?.isActive) {
+		return undefined;
+	}
+
+	const gitExtension = extension.exports as { getAPI?: (version: number) => GitApi } | undefined;
+	if (!gitExtension || typeof gitExtension.getAPI !== 'function') {
+		return undefined;
+	}
+
+	return gitExtension.getAPI(1);
+}
+
+function tryGetGitApi(): GitApi | undefined {
+	return resolveGitApiFromExtension(vscode.extensions.getExtension('vscode.git'));
+}
+
+async function getGitApi(): Promise<GitApi> {
+	const gitExtension = vscode.extensions.getExtension('vscode.git');
 	if (!gitExtension) {
 		logError('未检测到 VS Code Git 扩展');
 		throw new Error('未检测到 VS Code Git 扩展');
 	}
 
-	return gitExtension.getAPI(1) as GitApi;
+	if (!gitExtension.isActive) {
+		await gitExtension.activate();
+	}
+
+	const gitApi = resolveGitApiFromExtension(gitExtension);
+	if (!gitApi) {
+		logError('Git 扩展已激活，但无法获取 Git API');
+		throw new Error('无法获取 VS Code Git API');
+	}
+
+	return gitApi;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -152,6 +200,26 @@ function getRepositoryLabel(repository: GitRepository): string {
 	return path.basename(repository.rootUri.fsPath) || repository.rootUri.fsPath;
 }
 
+export function listGitRepositories(): GitRepositorySummary[] {
+	const gitApi = tryGetGitApi();
+	if (!gitApi) {
+		logDebug('Git 扩展尚未激活，暂不返回仓库列表');
+		return [];
+	}
+
+	return gitApi.repositories.map(repository => {
+		const label = getRepositoryLabel(repository);
+		const relativePath = vscode.workspace.asRelativePath(repository.rootUri, false);
+
+		return {
+			rootUri: repository.rootUri,
+			workspacePath: repository.rootUri.fsPath,
+			label,
+			description: relativePath && relativePath !== label ? relativePath : repository.rootUri.fsPath
+		};
+	});
+}
+
 function parseFileHistoryLog(output: string): GitFileHistoryEntry[] {
 	return output
 		.split('\x1e')
@@ -211,7 +279,7 @@ async function promptForRepository(repositories: GitRepository[]): Promise<GitRe
 }
 
 export async function resolveGitRepository(commandContext?: unknown): Promise<GitRepositoryContext> {
-	const git = getGitApi();
+	const git = await getGitApi();
 	const repositories = git.repositories;
 
 	if (repositories.length === 0) {
@@ -295,4 +363,115 @@ export async function getFileHistory(workspacePath: string, filePath: string, ma
 
 export async function setCommitMessage(message: string, repository: GitRepository): Promise<void> {
 	repository.inputBox.value = message;
+}
+
+function parseCommitLog(output: string): GitCommitEntry[] {
+	return output
+		.split('\x1e')
+		.map(entry => entry.trim())
+		.filter(Boolean)
+		.map(entry => {
+			const [commitHash, shortHash, authorName, commitDate, subject] = entry.split('\x1f');
+			return {
+				commitHash,
+				shortHash,
+				authorName,
+				commitDate,
+				subject
+			};
+		});
+}
+
+export async function getRecentCommits(workspacePath: string, maxEntries = 10): Promise<GitCommitEntry[]> {
+	logDebug(`获取最近 ${maxEntries} 条提交记录...`);
+
+	try {
+		const { stdout } = await execFile('git', [
+			'log',
+			`--max-count=${maxEntries}`,
+			'--date=short',
+			'--format=%x1e%H%x1f%h%x1f%an%x1f%ad%x1f%s'
+		], {
+			cwd: workspacePath,
+			maxBuffer: 1024 * 1024
+		});
+
+		return parseCommitLog(stdout);
+	} catch (error) {
+		logDebug(`获取提交历史失败: ${error}`);
+		return []; // 如果获取失败，返回空数组，不影响主要功能
+	}
+}
+
+function parseGitRemoteLog(output: string): GitRemoteEntry[] {
+	const remotes = new Map<string, GitRemoteEntry>();
+
+	for (const line of output.split(/\r?\n/).map(item => item.trim()).filter(Boolean)) {
+		const parts = line.split(/\s+/);
+		if (parts.length < 3) {
+			continue;
+		}
+
+		const [name, url, typeWithParen] = parts;
+		const type = typeWithParen.replace(/[()]/g, '');
+		const existing = remotes.get(name) ?? { name, fetchUrl: '', pushUrl: '' };
+
+		if (type === 'fetch') {
+			existing.fetchUrl = url;
+		} else if (type === 'push') {
+			existing.pushUrl = url;
+		}
+
+		remotes.set(name, existing);
+	}
+
+	return Array.from(remotes.values());
+}
+
+export async function getGitRemotes(workspacePath: string): Promise<GitRemoteEntry[]> {
+	logDebug('获取 Git 远程仓库列表...');
+
+	try {
+		const { stdout } = await execFile('git', ['remote', '-v'], {
+			cwd: workspacePath,
+			maxBuffer: 1024 * 1024
+		});
+
+		return parseGitRemoteLog(stdout);
+	} catch (error) {
+		logDebug(`获取远程仓库失败: ${error}`);
+		return [];
+	}
+}
+
+async function runGitCommand(workspacePath: string, args: string[]): Promise<void> {
+	await execFile('git', args, {
+		cwd: workspacePath,
+		maxBuffer: 1024 * 1024
+	});
+}
+
+export async function addGitRemote(workspacePath: string, name: string, url: string): Promise<void> {
+	await runGitCommand(workspacePath, ['remote', 'add', name, url]);
+}
+
+export async function renameGitRemote(workspacePath: string, currentName: string, nextName: string): Promise<void> {
+	await runGitCommand(workspacePath, ['remote', 'rename', currentName, nextName]);
+}
+
+export async function setGitRemoteUrl(workspacePath: string, name: string, url: string): Promise<void> {
+	await runGitCommand(workspacePath, ['remote', 'set-url', name, url]);
+	await runGitCommand(workspacePath, ['remote', 'set-url', '--push', name, url]);
+}
+
+export async function deleteGitRemote(workspacePath: string, name: string): Promise<void> {
+	await runGitCommand(workspacePath, ['remote', 'remove', name]);
+}
+
+export async function fetchGitRemote(workspacePath: string, name: string): Promise<void> {
+	await runGitCommand(workspacePath, ['fetch', name]);
+}
+
+export async function pushGitRemote(workspacePath: string, name: string): Promise<void> {
+	await runGitCommand(workspacePath, ['push', name]);
 }

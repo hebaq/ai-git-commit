@@ -1,7 +1,8 @@
 import { analyzeDiffSummary } from './diffAnalysis';
 import type { AIConfig } from './types';
+import type { GitCommitEntry } from './git';
 
-export function buildPrompt(diffOutput: string, config: AIConfig): string {
+export function buildPrompt(diffOutput: string, recentCommits: GitCommitEntry[], config: AIConfig): string {
 	const diffSummary = analyzeDiffSummary(diffOutput);
 	const fileSummary = diffSummary.modifiedFiles.slice(0, 8).join(', ') || '未识别修改文件';
 	const scopeHintText = diffSummary.scopeHints.length > 0 ? diffSummary.scopeHints.join(', ') : '无明确 scope 时请省略';
@@ -25,6 +26,16 @@ export function buildPrompt(diffOutput: string, config: AIConfig): string {
 
 	if (signalHints.length > 0) {
 		lines.push(...signalHints);
+	}
+
+	if (recentCommits.length > 0) {
+		lines.push(
+			'',
+			'最近提交历史（参考项目提交风格）：'
+		);
+		recentCommits.slice(0, 5).forEach(commit => {
+			lines.push(`- ${commit.subject}`);
+		});
 	}
 
 	lines.push(

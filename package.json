@@ -60,6 +60,12 @@
           "name": "部署管理",
           "icon": "resources/activitybar-icon.svg"
         }
+      ],
+      "scm": [
+        {
+          "id": "hebai-ai-git-commit-remote-repository-management-view",
+          "name": "远程仓库"
+        }
       ]
     },
     "commands": [
@@ -185,6 +191,49 @@
         "command": "hebai-ai-git-commit.importDeploymentServers",
         "title": "导入部署配置",
         "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "hebai-ai-git-commit.openRemoteRepositoryManagement",
+        "title": "打开远程仓库管理"
+      },
+      {
+        "command": "hebai-ai-git-commit.showRemoteRepository",
+        "title": "查看远程仓库"
+      },
+      {
+        "command": "hebai-ai-git-commit.addRemoteRepository",
+        "title": "新增远程仓库",
+        "icon": "$(add)"
+      },
+      {
+        "command": "hebai-ai-git-commit.editRemoteRepository",
+        "title": "编辑远程仓库",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "hebai-ai-git-commit.deleteRemoteRepository",
+        "title": "删除远程仓库",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "hebai-ai-git-commit.fetchRemoteRepository",
+        "title": "从远程仓库拉取",
+        "icon": "$(repo-fetch)"
+      },
+      {
+        "command": "hebai-ai-git-commit.pushToRemoteRepository",
+        "title": "推送到远程仓库",
+        "icon": "$(repo-push)"
+      },
+      {
+        "command": "hebai-ai-git-commit.copyRemoteRepositoryUrl",
+        "title": "复制远程仓库地址",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "hebai-ai-git-commit.refreshRemoteRepositories",
+        "title": "刷新远程仓库",
+        "icon": "$(refresh)"
       }
     ],
     "configuration": {
@@ -262,6 +311,12 @@
       }
     },
     "menus": {
+      "scm/title": [
+        {
+          "command": "hebai-ai-git-commit.generateCommitMessage",
+          "group": "navigation"
+        }
+      ],
       "view/title": [
         {
           "command": "hebai-ai-git-commit.addProviderProfile",
@@ -302,6 +357,16 @@
           "command": "hebai-ai-git-commit.importDeploymentServers",
           "when": "view == hebai-ai-git-commit-deployment-management-view",
           "group": "navigation@5"
+        },
+        {
+          "command": "hebai-ai-git-commit.addRemoteRepository",
+          "when": "view == hebai-ai-git-commit-remote-repository-management-view",
+          "group": "navigation@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.refreshRemoteRepositories",
+          "when": "view == hebai-ai-git-commit-remote-repository-management-view",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
@@ -429,6 +494,41 @@
           "command": "hebai-ai-git-commit.deleteDeploymentServer",
           "when": "view == hebai-ai-git-commit-deployment-management-view && viewItem == deploymentWorkspaceServer",
           "group": "inline@5"
+        },
+        {
+          "command": "hebai-ai-git-commit.addRemoteRepository",
+          "when": "view == hebai-ai-git-commit-remote-repository-management-view && viewItem == remoteRepositoryRoot",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.addRemoteRepository",
+          "when": "view == hebai-ai-git-commit-remote-repository-management-view && viewItem == remoteRepositoryEmpty",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.editRemoteRepository",
+          "when": "view == hebai-ai-git-commit-remote-repository-management-view && viewItem == remoteRepository",
+          "group": "inline@1"
+        },
+        {
+          "command": "hebai-ai-git-commit.copyRemoteRepositoryUrl",
+          "when": "view == hebai-ai-git-commit-remote-repository-management-view && viewItem == remoteRepository",
+          "group": "inline@2"
+        },
+        {
+          "command": "hebai-ai-git-commit.fetchRemoteRepository",
+          "when": "view == hebai-ai-git-commit-remote-repository-management-view && viewItem == remoteRepository",
+          "group": "inline@3"
+        },
+        {
+          "command": "hebai-ai-git-commit.pushToRemoteRepository",
+          "when": "view == hebai-ai-git-commit-remote-repository-management-view && viewItem == remoteRepository",
+          "group": "inline@4"
+        },
+        {
+          "command": "hebai-ai-git-commit.deleteRemoteRepository",
+          "when": "view == hebai-ai-git-commit-remote-repository-management-view && viewItem == remoteRepository",
+          "group": "inline@5"
         }
       ],
       "explorer/context": [
@@ -441,13 +541,6 @@
           "command": "hebai-ai-git-commit.uploadExplorerResourcesToDeploymentTarget",
           "when": "resourceScheme == file",
           "group": "navigation@20"
-        }
-      ],
-      "scm/title": [
-        {
-          "command": "hebai-ai-git-commit.generateCommitMessage",
-          "when": "scmProvider == git",
-          "group": "navigation"
         }
       ]
     },
