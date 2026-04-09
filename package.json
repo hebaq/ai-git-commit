@@ -64,7 +64,8 @@
       "scm": [
         {
           "id": "hebai-ai-git-commit-remote-repository-management-view",
-          "name": "远程仓库"
+		  "name": "远程仓库",
+		  "icon": "resources/activitybar-icon.svg"
         }
       ]
     },
@@ -194,11 +195,13 @@
       },
       {
         "command": "hebai-ai-git-commit.openRemoteRepositoryManagement",
-        "title": "打开远程仓库管理"
+  		"title": "打开远程仓库管理",
+  		"icon": "$(repo)"
       },
       {
         "command": "hebai-ai-git-commit.showRemoteRepository",
-        "title": "查看远程仓库"
+  		"title": "查看远程仓库",
+  		"icon": "$(repo)"
       },
       {
         "command": "hebai-ai-git-commit.addRemoteRepository",

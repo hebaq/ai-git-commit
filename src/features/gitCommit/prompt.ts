@@ -1,9 +1,98 @@
 import { analyzeDiffSummary } from './diffAnalysis';
+import { PROMPT_DIFF_BLOCK_MAX_CHARS, PROMPT_DIFF_MAX_BLOCKS, PROMPT_DIFF_MAX_CHARS } from './constants';
 import type { AIConfig } from './types';
 import type { GitCommitEntry } from './git';
 
+function splitDiffIntoBlocks(diffOutput: string): string[] {
+	const lines = diffOutput.split('\n');
+	const blocks: string[] = [];
+	let currentBlock: string[] = [];
+
+	for (const line of lines) {
+		if (line.startsWith('diff --git ') && currentBlock.length > 0) {
+			blocks.push(currentBlock.join('\n'));
+			currentBlock = [line];
+			continue;
+		}
+
+		currentBlock.push(line);
+	}
+
+	if (currentBlock.length > 0) {
+		blocks.push(currentBlock.join('\n'));
+	}
+
+	return blocks.filter(Boolean);
+}
+
+function truncateBlock(block: string, maxChars: number): string {
+	if (block.length <= maxChars) {
+		return block;
+	}
+
+	const lines = block.split('\n');
+	const keptLines: string[] = [];
+	let currentLength = 0;
+	const marker = '... [该文件剩余 diff 已截断]';
+
+	for (const line of lines) {
+		const nextLength = currentLength + line.length + 1;
+		if (nextLength + marker.length > maxChars) {
+			break;
+		}
+
+		keptLines.push(line);
+		currentLength = nextLength;
+	}
+
+	keptLines.push(marker);
+	return keptLines.join('\n');
+}
+
+function truncateDiffForPrompt(diffOutput: string): { text: string; wasTruncated: boolean; } {
+	if (diffOutput.length <= PROMPT_DIFF_MAX_CHARS) {
+		return {
+			text: diffOutput,
+			wasTruncated: false
+		};
+	}
+
+	const blocks = splitDiffIntoBlocks(diffOutput);
+	const selectedBlocks: string[] = [];
+	let usedChars = 0;
+	let consumedBlocks = 0;
+
+	for (const block of blocks) {
+		if (consumedBlocks >= PROMPT_DIFF_MAX_BLOCKS || usedChars >= PROMPT_DIFF_MAX_CHARS) {
+			break;
+		}
+
+		const remainingChars = PROMPT_DIFF_MAX_CHARS - usedChars;
+		const blockBudget = Math.min(PROMPT_DIFF_BLOCK_MAX_CHARS, remainingChars);
+		if (blockBudget <= 64) {
+			break;
+		}
+
+		const truncatedBlock = truncateBlock(block, blockBudget);
+		selectedBlocks.push(truncatedBlock);
+		usedChars += truncatedBlock.length + 1;
+		consumedBlocks++;
+	}
+
+	const omittedBlocks = Math.max(blocks.length - consumedBlocks, 0);
+	if (omittedBlocks > 0) {
+		selectedBlocks.push(`... [其余 ${omittedBlocks} 个文件的 diff 已省略，以控制 token 开销]`);
+	}
+
+	return {
+		text: selectedBlocks.join('\n'),
+		wasTruncated: true
+	};
+}
+
 export function buildPrompt(diffOutput: string, recentCommits: GitCommitEntry[], config: AIConfig): string {
 	const diffSummary = analyzeDiffSummary(diffOutput);
+	const truncatedDiff = truncateDiffForPrompt(diffOutput);
 	const fileSummary = diffSummary.modifiedFiles.slice(0, 8).join(', ') || '未识别修改文件';
 	const scopeHintText = diffSummary.scopeHints.length > 0 ? diffSummary.scopeHints.join(', ') : '无明确 scope 时请省略';
 	const signalHints = [
@@ -28,6 +117,10 @@ export function buildPrompt(diffOutput: string, recentCommits: GitCommitEntry[],
 		lines.push(...signalHints);
 	}
 
+	if (truncatedDiff.wasTruncated) {
+		lines.push('- diff 已按 token 预算裁剪，优先保留文件边界和前部变更块。');
+	}
+
 	if (recentCommits.length > 0) {
 		lines.push(
 			'',
@@ -42,7 +135,7 @@ export function buildPrompt(diffOutput: string, recentCommits: GitCommitEntry[],
 		'',
 		'代码变更：',
 		'```diff',
-		diffOutput,
+		truncatedDiff.text,
 		'```',
 		'',
 		'严格要求：',

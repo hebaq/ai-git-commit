@@ -38,10 +38,17 @@ export function activate(context: vscode.ExtensionContext) {
 		await vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
 			title: GENERATE_PROGRESS_TITLE,
-			cancellable: false
-		}, async () => {
+			cancellable: true
+		}, async (_, cancellationToken) => {
+			const abortController = new AbortController();
+			cancellationToken.onCancellationRequested(() => {
+				abortController.abort();
+			});
+
 			try {
-				await handleGenerateCommitMessage(commandArgs.length <= 1 ? commandArgs[0] : commandArgs);
+				await handleGenerateCommitMessage(commandArgs.length <= 1 ? commandArgs[0] : commandArgs, {
+					signal: abortController.signal
+				});
 			} catch (error) {
 				logError('生成提交信息时出错:', error);
 				showOutputChannel(true);
@@ -65,10 +72,17 @@ export function activate(context: vscode.ExtensionContext) {
 		await vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
 			title: TEST_MODEL_PROGRESS_TITLE,
-			cancellable: false
-		}, async () => {
+			cancellable: true
+		}, async (_, cancellationToken) => {
+			const abortController = new AbortController();
+			cancellationToken.onCancellationRequested(() => {
+				abortController.abort();
+			});
+
 			try {
-				await handleTestModelConnection(commandArg);
+				await handleTestModelConnection(commandArg, {
+					signal: abortController.signal
+				});
 			} catch (error) {
 				logError('测试模型连接时出错:', error);
 				showOutputChannel(true);

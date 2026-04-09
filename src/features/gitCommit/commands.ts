@@ -6,7 +6,7 @@ import { ensureGitRepository, getDiffForCommitMessage, getRecentCommits, resolve
 import { testAIConfigConnection } from './modelTest';
 import { logDebug, logError, logGeneratedCommitMessage, logInfo, showOutputChannel } from './output';
 import { openProviderManagementPanel } from './providerManagementPanel';
-import type { AIConfig } from './types';
+import type { AIConfig, AIRequestOptions } from './types';
 
 function resolveProfileIdFromCommandArg(commandArg?: unknown): string | undefined {
 	if (typeof commandArg === 'string' && commandArg) {
@@ -23,8 +23,15 @@ function resolveProfileIdFromCommandArg(commandArg?: unknown): string | undefine
 	return undefined;
 }
 
-async function analyzeChangesAndGenerateMessage(diffOutput: string, workspacePath: string, config: AIConfig): Promise<string> {
+function ensureRequestNotCancelled(signal?: AbortSignal): void {
+	if (signal?.aborted) {
+		throw new Error('操作已取消');
+	}
+}
+
+async function analyzeChangesAndGenerateMessage(diffOutput: string, workspacePath: string, config: AIConfig, options: AIRequestOptions): Promise<string> {
 	logDebug('开始分析变更并生成消息...');
+	ensureRequestNotCancelled(options.signal);
 
 	if (!config.apiKey) {
 		throw new Error('请先在设置中配置 API Key');
@@ -33,24 +40,27 @@ async function analyzeChangesAndGenerateMessage(diffOutput: string, workspacePat
 	try {
 		logDebug('尝试使用 AI 生成提交信息...');
 		const recentCommits = await getRecentCommits(workspacePath, 10);
-		return await generateAICommitMessage(diffOutput, recentCommits, config);
+		ensureRequestNotCancelled(options.signal);
+		return await generateAICommitMessage(diffOutput, recentCommits, config, options);
 	} catch (error) {
 		logError('AI 生成失败:', error);
 		throw new Error(`AI 生成失败: ${error instanceof Error ? error.message : '未知错误'}`);
 	}
 }
 
-export async function handleGenerateCommitMessage(commandContext?: unknown): Promise<void> {
+export async function handleGenerateCommitMessage(commandContext?: unknown, options: AIRequestOptions = {}): Promise<void> {
 	logDebug('开始生成提交信息...');
+	ensureRequestNotCancelled(options.signal);
 
 	const { repository, workspacePath } = await resolveGitRepository(commandContext);
 	logDebug(`目标 Git 仓库: ${workspacePath}`);
 
 	await ensureGitRepository(workspacePath);
+	ensureRequestNotCancelled(options.signal);
 
 	const diffOutput = await getDiffForCommitMessage(workspacePath);
 	const config = getAIConfig();
-	const commitMessage = await analyzeChangesAndGenerateMessage(diffOutput, workspacePath, config);
+	const commitMessage = await analyzeChangesAndGenerateMessage(diffOutput, workspacePath, config, options);
 
 	await setCommitMessage(commitMessage, repository);
 	logGeneratedCommitMessage(commitMessage);
@@ -59,8 +69,9 @@ export async function handleGenerateCommitMessage(commandContext?: unknown): Pro
 	vscode.window.showInformationMessage('提交信息生成成功');
 }
 
-export async function handleTestModelConnection(commandArg?: unknown): Promise<void> {
+export async function handleTestModelConnection(commandArg?: unknown, options: AIRequestOptions = {}): Promise<void> {
 	logDebug('开始测试模型连接...');
+	ensureRequestNotCancelled(options.signal);
 
 	const profileId = resolveProfileIdFromCommandArg(commandArg);
 	const config = profileId
@@ -73,7 +84,7 @@ export async function handleTestModelConnection(commandArg?: unknown): Promise<v
 			return resolveAIConfigFromProfile(profile);
 		})()
 		: getAIConfig();
-	await testAIConfigConnection(config);
+	await testAIConfigConnection(config, options);
 	showOutputChannel(true);
 
 	vscode.window.showInformationMessage(

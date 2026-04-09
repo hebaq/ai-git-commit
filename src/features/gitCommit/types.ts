@@ -23,6 +23,11 @@ export interface AIConfig {
 	baseUrl?: string;
 }
 
+export interface AIRequestOptions {
+	signal?: AbortSignal;
+	timeoutMs?: number;
+}
+
 export interface DiffSummary {
 	modifiedFiles: string[];
 	addedLines: number;
