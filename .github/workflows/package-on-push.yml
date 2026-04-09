@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   package:
     runs-on: ubuntu-latest
@@ -34,6 +37,25 @@ jobs:
 
       - name: Package VSIX
         run: pnpm run package
+
+      - name: Publish nightly prerelease
+        uses: ncipollo/release-action@v1
+        with:
+          tag: nightly
+          name: Nightly Build
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          removeArtifacts: true
+          artifactErrorsFailBuild: true
+          artifacts: '*.vsix'
+          body: |
+            自动更新的预发布版本。
+
+            - 触发方式：每次 push 自动打包
+            - 附件内容：当前最新提交生成的 VSIX
+            - 用途：用于预览和内部验证，不代表正式稳定版本
+          commit: ${{ github.sha }}
 
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
